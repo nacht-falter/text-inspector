@@ -1,29 +1,34 @@
 import os
+import re
 import time
 
-SEPARATOR = "-------------------------"
+SEPARATOR = "------------------------------"
 
 class Menu:
     """
-    Creates a menuself.
+    Creates a menu which generates menu options from passed functions.
     
     Arguments:
-    - Menu title
+    - Menu title (str)
+    - A repeat flag (bool)
+    - An exit flag (bool) 
     - At least one function
 
     Methods:
     - display_menu(): Clears the terminal and displays the menu
     """
-    def __init__(self, title, *args):
+    def __init__(self, title, repeat, exit_option, *args):
         self.menu_title = title
+        self.repeat = repeat 
+        self.exit_option = exit_option
         self.menu_items = args
-
+    
     def display_menu(self):
         while True:
-            os.system("clear")
-            print(self.menu_title)
-            print(SEPARATOR)
+            display_header()
+            print(f"{self.menu_title}\n")
             i = 1
+            option_count = len(self.menu_items)
             for item in self.menu_items:
                 """
                 # Get function name and docstring:
@@ -33,19 +38,36 @@ class Menu:
                 menu_item = f'{item.__name__.capitalize().replace("_", " ")}: {item.__doc__}'
                 print(f"{i}. {menu_item}")
                 i += 1
-            print(f"{i}. Exit")
-            option = int(input("\nPlease choose an option: "))
+
+            if self.exit_option == True:
+                print(f"{i}. Exit program")
+                option_count +=1
+
+            option = input("\nPlease choose an option: ")
+
             try:
-                if option in range(1, len(self.menu_items) + 1):
+                option = int(option)
+
+                if option <= len(self.menu_items):
                     self.menu_items[option - 1]()
-                elif option == len(self.menu_items) + 1:
-                    print("Thank you for using Text Inspector!")
+                    if self.repeat == False:
+                        break
+                elif self.exit_option == True and option == option_count:
+                    print("Exiting. Thank you for using Text Inspector!")
                     exit()
                 else:
                     raise ValueError
+
             except ValueError:
-                print(f"Invalid choice. Please enter a number between 1 and {len(self.menu_items)}.\n")
+                print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
                 time.sleep(2)
+
+def display_header():
+    """Clear terminal and display a header"""
+    os.system("clear")  # Source?
+    print(SEPARATOR)
+    print("Welcome to " + "Text Inspector!".upper())
+    print(f"{SEPARATOR}\n")
 
 def spell_check():
     """Check for spelling errors in the selected text"""
@@ -62,5 +84,5 @@ def display_metrics():
     print("metrics")
     time.sleep(1)
 
-main_menu = Menu("Main menu", spell_check, suggest_synonyms, display_metrics)
+main_menu = Menu("What would you like to do?", True, True, spell_check, suggest_synonyms, display_metrics)
 main_menu.display_menu()
