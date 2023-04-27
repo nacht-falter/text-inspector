@@ -4,6 +4,65 @@ import time
 
 SEPARATOR = "------------------------------"
 
+class Text:
+    """
+    Creates an instance of a text. Retrieves text input from file or user input.
+
+    Attributes:
+    ...
+
+    Methods:
+    ...
+    """
+
+    def __init__(self):
+        self.title = self.get_title()
+        self.text = self.get_text()
+
+    def get_title(self):
+        """Get instance title from user input"""
+        while True:
+            try:
+                title = str(input("Please enter a title for your text\n"))
+                if len(title) == 0:
+                    raise ValueError("The title can't be empty. Please provide a valid title")
+                elif not re.match("^[a-zA-Z0-9 _-]*$", title):  # Source?
+                    raise ValueError("The title cannot contain any special characters or numbers")
+                else:
+                    return title
+            except ValueError as e:
+                print(f"Invalid data: {e}. Please try again.")
+
+    def get_text(self):
+        """Create a new menu to determine input method"""
+        select_menu = Menu("Please choose an input method for your text", False, False, self.user_input, self.file_input)
+        return select_menu.display_menu()
+
+    def user_input(self):
+        """Read text from user input"""
+        while True:
+            try:
+                input_text = str(input("Please enter or paste your text here\n"))
+                if len(input_text) == 0:
+                    raise ValueError("No input received. Please provide some text")
+                else:
+                    return input_text
+            except ValueError as e:
+                print(f"Invalid data: {e}. Please try again.")
+
+    def file_input(self):
+        """Read text from file"""
+        while True:
+            try:
+                file_name = str(input("Please enter the name of the file you want to check (type example1.txt or example2.txt for examples)\n"))
+                f = open(f"{file_name}", "r")
+                lines = f.read()
+                f.close()
+                return lines
+            except FileNotFoundError:
+                print("File not found. Please try again with a different file.\n")
+
+
 class Menu:
     """
     Creates a menu which generates menu options from passed functions.
@@ -60,7 +119,7 @@ class Menu:
 
             except ValueError:
                 print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
-                time.sleep(2)
+                time.sleep(1)
 
 def display_header():
     """Clear terminal and display a header"""
@@ -84,5 +143,7 @@ def display_metrics():
     print("metrics")
     time.sleep(1)
 
-main_menu = Menu("What would you like to do?", True, True, spell_check, suggest_synonyms, display_metrics)
+new_text = Text()
+print(new_text.text)
+main_menu = Menu("What would you like to do?", True, False, spell_check, suggest_synonyms, display_metrics)
 main_menu.display_menu()
