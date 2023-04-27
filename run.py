@@ -3,6 +3,7 @@ import re
 import time
 
 SEPARATOR = "------------------------------"
+STORAGE = {}
 
 class Text:
     """
@@ -20,7 +21,7 @@ class Text:
 
     def __init__(self):
         self.title = self.get_title()
-        self.get_text()
+        self.text = self.get_text()
 
     def get_title(self):
         """Get instance title from user input"""
@@ -38,8 +39,8 @@ class Text:
 
     def get_text(self):
         """Create a new menu to determine input method"""
-        get_text_menu = Menu("Please choose an input method for your text", False, False, self.user_input, self.file_input)
-        get_text_menu.display_menu()
+        input_method_menu = Menu("Please choose an input method for your text", False, False, self.user_input, self.file_input)
+        return input_method_menu.display_menu()
 
     def user_input(self):
         """Read text from user input"""
@@ -60,8 +61,7 @@ class Text:
                 if len(lines) == 0:
                     raise ValueError("No input received.")
                 else:
-                    self.text = lines
-                    break
+                    return lines 
             except ValueError as e:
                 print(f"Invalid data: {e}. Please try again.")
 
@@ -73,8 +73,7 @@ class Text:
                 f = open(f"{file_name}", "r")
                 lines = f.read()
                 f.close()
-                self.text = lines
-                break
+                return lines 
             except FileNotFoundError:
                 print("File not found. Please try again with a different file.\n")
 
@@ -97,6 +96,7 @@ class Menu:
         self.repeat = repeat 
         self.exit_option = exit_option
         self.menu_items = args
+        self.return_value = None
     
     def display_menu(self):
         while True:
@@ -124,7 +124,7 @@ class Menu:
                 option = int(option)
 
                 if option <= len(self.menu_items):
-                    self.menu_items[option - 1]()
+                    self.return_value = self.menu_items[option - 1]()
                     if self.repeat == False:
                         break
                 elif self.exit_option == True and option == option_count:
@@ -136,6 +136,7 @@ class Menu:
             except ValueError:
                 print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
                 time.sleep(1)
+        return self.return_value
 
 def display_header():
     """Clear terminal and display a header"""
@@ -144,22 +145,39 @@ def display_header():
     print("Welcome to " + "Text Inspector!".upper())
     print(f"{SEPARATOR}\n")
 
+def select_text():
+    """Display a menu to create a new text or load an existing text"""
+    select_text_menu = Menu("What would you like to do?", False, True, create_new_text, load_text)
+    text = select_text_menu.display_menu()
+    return text
+
+def create_new_text():
+    """Create a new text from command line input or file"""
+    new_text = Text()
+    return new_text
+
+def load_text():
+    """Load an existing text from storage"""
+    print("Load existing text")
+
 def spell_check():
     """Check for spelling errors in the selected text"""
     print("Spell check")
-    time.sleep(1)
+    print(current_text.text)
+    time.sleep(3)
 
 def suggest_synonyms():
     """Suggest synonyms for frequently used words"""
     print("synonyms")
+    print(current_text.text)
     time.sleep(1)
 
 def display_metrics():
     """Display metrics for the seleced text"""
     print("metrics")
+    print(current_text.text)
     time.sleep(1)
 
-new_text = Text()
-print(new_text.text)
+current_text = select_text()
 main_menu = Menu("What would you like to do?", True, False, spell_check, suggest_synonyms, display_metrics)
 main_menu.display_menu()
