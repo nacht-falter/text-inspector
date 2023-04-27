@@ -9,15 +9,18 @@ class Text:
     Creates an instance of a text. Retrieves text input from file or user input.
 
     Attributes:
-    ...
+    title: Title of the text instance provided by user
+    text: Text contents provided by user
 
     Methods:
-    ...
+    get_text(): Display a menu to select an input method
+    user_input(): Read text from command line interface
+    file_input(): Read text from file
     """
 
     def __init__(self):
         self.title = self.get_title()
-        self.text = self.get_text()
+        self.get_text()
 
     def get_title(self):
         """Get instance title from user input"""
@@ -35,18 +38,30 @@ class Text:
 
     def get_text(self):
         """Create a new menu to determine input method"""
-        select_menu = Menu("Please choose an input method for your text", False, False, self.user_input, self.file_input)
-        return select_menu.display_menu()
+        get_text_menu = Menu("Please choose an input method for your text", False, False, self.user_input, self.file_input)
+        get_text_menu.display_menu()
 
     def user_input(self):
         """Read text from user input"""
+        print("Please enter or paste your text. To save your input enter a new line and press Ctrl-D.\n")
+        lines = []
         while True:
             try:
-                input_text = str(input("Please enter or paste your text here\n"))
-                if len(input_text) == 0:
-                    raise ValueError("No input received. Please provide some text")
+                """
+                Read multiline input:
+                https://stackoverflow.com/questions/30239092/how-to-get-multiline-input-from-the-user
+                """
+                while True:
+                    try:
+                        line = input()
+                    except EOFError:
+                        break
+                    lines.append(line)
+                if len(lines) == 0:
+                    raise ValueError("No input received.")
                 else:
-                    return input_text
+                    self.text = lines
+                    break
             except ValueError as e:
                 print(f"Invalid data: {e}. Please try again.")
 
@@ -54,11 +69,12 @@ class Text:
         """Read text from file"""
         while True:
             try:
-                file_name = str(input("Please enter the name of the file you want to check (type example1.txt or example2.txt for examples)\n"))
+                file_name = str(input("Please enter the name of the file you want to check\n(File upload not possible in the online version. Type example1.txt or example2.txt for examples)\n"))
                 f = open(f"{file_name}", "r")
                 lines = f.read()
                 f.close()
-                return lines
+                self.text = lines
+                break
             except FileNotFoundError:
                 print("File not found. Please try again with a different file.\n")
 
