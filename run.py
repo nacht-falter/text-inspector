@@ -1,8 +1,9 @@
-from enum import unique
 import os
 import re
 import time
 from spellchecker import SpellChecker
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 
 SEPARATOR = "------------------------------"
 STORAGE = {}
@@ -30,8 +31,6 @@ class Text:
     def __init__(self):
         self.title = self.get_title()
         self.text = self.get_text()
-        # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
-        self.split_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
 
     def get_title(self):
         """Get instance title from user input"""
@@ -109,12 +108,14 @@ class Text:
         """Check for spelling errors in the selected text"""
         # pyspellchecker documentation: https://pyspellchecker.readthedocs.io/en/latest/
         spell = SpellChecker(language="en")
-        misspelled = spell.unknown(self.split_text)
-        time.sleep(2)
+        # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
+        tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
+
+        misspelled = spell.unknown(tokenized_text)
         corrected_text = []
         i = 0
 
-        for word in self.split_text:
+        for word in tokenized_text:
             # match alphanumeric words including hyphens and underscores: https://stackoverflow.com/questions/34916716/regular-expression-to-match-alphanumeric-hyphen-underscore-and-space-string
             if re.match(r"^[a-zA-Z]([\w-]*[a-zA-Z])?$", word) and word in misspelled:
                 suggestions = spell.candidates(word)
@@ -132,7 +133,6 @@ class Text:
 
     def suggest_synonyms(self):
         """Check for repeating words and suggest synonyms"""
-        print("Suggest synonyms")
         input("Press Enter to return to Menu")
 
     def display_suggestions(self, word, suggestions):
@@ -171,7 +171,7 @@ class Text:
 
             except ValueError:
                 print(
-                    f"Invalid choice. Possible values are numbers between 1 and {option_count} and the letters e and s.\n"
+                    f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s.\n"
                 )
                 time.sleep(2)
 
@@ -186,20 +186,58 @@ class Text:
     def display_metrics(self):
         """Display metrics for the seleced text"""
         display_header()
-        print(f"Selected Text: {self.title}\n")
-        print("Text Metrics:")
 
-        # Total word count and unique words:
+        total_words, unique_words, most_used_words = self.count_words()
+        total_sentences, sentence_lengths = self.count_sentences()
+
+        print(f"Selected Text: {self.title}\n")
+        print("Text Metrics:\n")
+        print(f"Words: {total_words}")
+        print(f"Unique words: {len(unique_words)}")
+        print(f"Sentences: {total_sentences}")
+        print(f"Longest sentence: {max(sentence_lengths)} words")
+        print(f"Shortest sentence: {min(sentence_lengths)} words")
+        print(f"Average words per sentence: {round(total_words / total_sentences)}")
+
+        print(f"\nMost used words (lemmatized, not including short words with less than 4 characters):")
+
+        counter = 0
+        for lemma, occurences in most_used_words:
+            if counter < 15:
+                print(f"{lemma}: {occurences}")
+            counter += 1
+
+        input("\nPress Enter to return to menu.")
+
+    def count_words(self):
+        """Get total word count, unique word count, and word frequency"""
         total_words = 0
-        unique_words = {}
-        for word in self.split_text:
+
+        # Tokenize text with nltk.tokenize. NLTK documentation: https://www.nltk.org/api/nltk.tokenize.html?highlight=tokenize#module-nltk.tokenize
+        tokenized_text = word_tokenize(self.text)
+        lemmas = {}
+        unique_words = set()
+
+        for word in tokenized_text:
             if re.match(r"^[a-za-z]([\w-]*[a-za-z])?$", word):
                 total_words += 1
-                if word in unique_words:
-                    unique_words[word] += 1
-                else:
-                    unique_words[word] = 1
+                unique_words.add(word)
+                # Retrieve lemmas from WordNetLemmatizer: https://www.nltk.org/api/nltk.stem.wordnet.html?highlight=lemmatizer#nltk.stem.wordnet.WordNetLemmatizer
+                lemmatizer = WordNetLemmatizer()
+                lemma = lemmatizer.lemmatize(word)
 
+                if lemma in lemmas and len(word) > 3:
+                    lemmas[lemma] += 1
+                else:
+                    lemmas[lemma] = 1
+
+        # Sort the dictionary: https://realpython.com/sort-python-dictionary/#getting-keys-values-or-both-from-a-dictionary
+        most_used_words = sorted(lemmas.items(), key=lambda item: item[1], reverse=True)
+
+        return total_words, unique_words, most_used_words
+
+    def count_sentences(self):
+        """Get total sentence count, longest/shortest sentence and average words per sentence"""
         # Total sentence count: https://stackoverflow.com/questions/15228054/how-to-count-the-amount-of-sentences-in-a-paragraph-in-python
         all_sentences = re.split(r"[.!?]+", self.text)
         total_sentences = len(all_sentences)
@@ -211,16 +249,7 @@ class Text:
             if len(words) > 0:
                 sentence_lengths.add(len(words))
 
-        # Average words per sentence:
-        words_per_sentence = round(total_words / total_sentences)
-
-        print(f"Words: {total_words}")
-        print(f"Sentences: {total_sentences}")
-        print(f"Longest sentence: {max(sentence_lengths)} words")
-        print(f"Shortest sentence: {min(sentence_lengths)} words")
-        print(f"Average words per sentence: {words_per_sentence}")
-
-        input("\nPress Enter to return to menu.")
+        return total_sentences, sentence_lengths
 
 
 class Menu:
