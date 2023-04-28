@@ -12,13 +12,18 @@ class Text:
     Creates an instance of a text. Retrieves text input from file or user input.
 
     Attributes:
-    title: Title of the text instance provided by user
-    text: Text contents provided by user
+    - title: Title of the text instance provided by user
+    - text: Text contents provided by user
 
     Methods:
-    get_text(): Display a menu to select an input method
-    user_input(): Read text from command line interface
-    file_input(): Read text from file
+    - get_text(): Display a menu to select an input method
+    - user_input(): Read text from command line interface
+    - file_input(): Read text from file
+    - spell_check(): Run a spell check on text
+    - suggest_synonyms(): Suggest synonyms for repeated words
+    - display_suggestions(): Display suggestions and let user confirm, skip or enter custom word
+    - display_text(): Prints the revised text to the console
+    - display_metrics(): Display text metrics
     """
 
     def __init__(self):
@@ -30,6 +35,7 @@ class Text:
         while True:
             try:
                 title = str(input("Please enter a title for your text\n"))
+
                 if len(title) == 0:
                     raise ValueError("The title can't be empty. Please provide a valid title")
                 elif not re.match(
@@ -38,6 +44,7 @@ class Text:
                     raise ValueError("The title cannot contain any special characters or numbers")
                 else:
                     return title
+
             except ValueError as e:
                 print(f"Invalid data: {e}. Please try again.")
 
@@ -46,12 +53,15 @@ class Text:
         input_method_menu = Menu(
             "Please choose an input method for your text", False, False, self.user_input, self.file_input
         )
+
         return input_method_menu.display_menu()
 
     def user_input(self):
         """Read text from user input"""
         print("Please enter or paste your text. To save your input enter a new line and press Ctrl-D.\n")
+
         lines = []
+
         while True:
             try:
                 """
@@ -64,10 +74,12 @@ class Text:
                     except EOFError:
                         break
                     lines.append(line)
+
                 if len(lines) == 0:
                     raise ValueError("No input received.")
                 else:
                     return "\n".join(lines)
+
             except ValueError as e:
                 print(f"Invalid data: {e}. Please try again.")
 
@@ -77,13 +89,16 @@ class Text:
             try:
                 file_name = str(
                     input(
-                        "Please enter the name of the file you want to check\n(File upload not possible in the online version. Type example1.txt or example2.txt for examples)\n"
+                        "Please enter the name of the file you want to check\nType example1.txt or example2.txt for examples)\n"
                     )
                 )
+
                 f = open(f"{file_name}", "r")
                 lines = f.read()
                 f.close()
+
                 return "\n".join(lines)
+
             except FileNotFoundError:
                 print("File not found. Please try again with a different file.\n")
 
@@ -91,7 +106,7 @@ class Text:
         """Check for spelling errors in the selected text"""
 
         # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
-        split_text = re.findall(r"[\w']+|[ .,!?;\n]", self.text)
+        split_text = re.findall(r"[\w']+|[ .,!?-_@#$%&*;:<>=()[\]{}\n]", self.text)
 
         # pyspellchecker documentation: https://pyspellchecker.readthedocs.io/en/latest/
         spell = SpellChecker(language="en")
@@ -103,18 +118,74 @@ class Text:
         for word in split_text:
             if word.isalnum() and word in misspelled:
                 suggestions = spell.candidates(word)
-                corrected_text.append(display_suggestions(word, suggestions))
+                # Call display_suggestions method and pass it the current word and its suggestions
+                corrected_text.append(self.display_suggestions(word, suggestions))
             else:
                 corrected_text.append(word)
+
             i += 1
 
         self.text = "".join(corrected_text)
 
         display_header()
+        self.display_text()
+
+    def suggest_synonyms(self):
+        """Check for repeating words and suggest synonyms"""
+        print("Suggest synonyms")
+        input("Press Enter to return to Menu")
+
+    def display_suggestions(self, word, suggestions):
+        """Display suggestions one by one and let user accept, edit or skip to next"""
+        os.system("clear")
+        display_header()
+        print(f"Current text: {self.title}")
+        print(f"Spelling error found: {word}")
+        print("\nPlease choose one of the following replacements:\n")
+        option_count = 1
+
+        if suggestions is not None:
+            for suggestion in suggestions:
+                print(f"{option_count}. Replace with: {suggestion}")
+                option_count += 1
+                if option_count > 5:
+                    break
+        else:
+            print("No suggestions found")
+
+        print(f"\nPress 'e' to enter custom replacement")
+        print(f"Press 's' to skip")
+
+        while True:
+            option = input("\nPlease choose an option: ")
+
+            try:
+                if option.isdigit() and int(option) < option_count:
+                    return list(suggestions)[int(option) - 1]
+                elif option == "e":
+                    return input("Please enter your replacement: ")
+                elif option == "s":
+                    return word
+                else:
+                    raise ValueError
+
+            except ValueError:
+                print(
+                    f"Invalid choice. Possible values are numbers between 1 and {option_count} and the letters e and s.\n"
+                )
+                time.sleep(2)
+
+    def display_text(self):
+        """Print the revised text to the console"""
         print("Here is your revised text:\n")
         print(f"{SEPARATOR}\n")
         print(self.text)
         print(f"\n{SEPARATOR}")
+        input("\nPress Enter to return to menu.")
+
+    def display_metrics(self):
+        """Display metrics for the seleced text"""
+        print("metrics")
         input("\nPress Enter to return to menu.")
 
 
@@ -140,11 +211,14 @@ class Menu:
         self.return_value = None
 
     def display_menu(self):
+        """Clear the console and display the menu"""
         while True:
             display_header()
+
             print(f"{self.menu_title}\n")
             i = 1
             option_count = len(self.menu_items)
+
             for item in self.menu_items:
                 """
                 # Get function name and docstring:
@@ -165,9 +239,12 @@ class Menu:
                 option = int(option)
 
                 if option <= len(self.menu_items):
+                    # Call the function passed to the Menu class according to user selection:
                     self.return_value = self.menu_items[option - 1]()
+
                     if self.repeat == False:
                         break
+
                 elif self.exit_option == True and option == option_count:
                     print("Exiting. Thank you for using Text Inspector!")
                     exit()
@@ -177,6 +254,7 @@ class Menu:
             except ValueError:
                 print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
                 time.sleep(1)
+
         return self.return_value
 
 
@@ -189,15 +267,17 @@ def display_header():
 
 
 def select_text():
-    """Display a menu to create a new text or load an existing text"""
+    """Create a new text or load an existing one"""
     select_text_menu = Menu("What would you like to do?", False, True, create_new_text, load_text)
     text = select_text_menu.display_menu()
+
     return text
 
 
 def create_new_text():
-    """Create a new text from command line input or file"""
+    """Create a new text from Text class"""
     new_text = Text()
+
     return new_text
 
 
@@ -206,57 +286,21 @@ def load_text():
     print("Load existing text")
 
 
-def display_suggestions(word, suggestions):
-    os.system("clear")
-    display_header()
-    print(f"Spelling error found: {word}")
-    print("\nPlease choose one of the following replacements:\n")
-    option_count = 1
-    if suggestions is not None:
-        for suggestion in suggestions:
-            print(f"{option_count}. Replace with: {suggestion}")
-            option_count += 1
-            if option_count > 5:
-                break
-    else:
-        print("No suggestions found")
-    print(f"\nPress 'e' to enter custom replacement")
-    print(f"Press 's' to skip")
+def main():
+    """Run the program"""
+    current_text = select_text()
 
-    while True:
-        option = input("\nPlease choose an option: ")
+    main_menu = Menu(
+        f"Selected text: {current_text.title}\n\nWhat would you like to do?",
+        True,
+        False,
+        current_text.spell_check,
+        current_text.suggest_synonyms,
+        current_text.display_metrics,
+        select_text,
+    )
 
-        try:
-            if option.isdigit() and int(option) < option_count:
-                return list(suggestions)[int(option) - 1]
-            elif option == "e":
-                return input("Please enter your replacement: ")
-            elif option == "s":
-                return word
-            else:
-                raise ValueError
-
-        except ValueError:
-            print(
-                f"Invalid choice. Possible values are numbers between 1 and {option_count} and the letters e and s.\n"
-            )
-            time.sleep(2)
+    main_menu.display_menu()
 
 
-def suggest_synonyms():
-    """Suggest synonyms for frequently used words"""
-    print("synonyms")
-    print(current_text.text)
-    time.sleep(1)
-
-
-def display_metrics():
-    """Display metrics for the seleced text"""
-    print("metrics")
-    print(current_text.text)
-    time.sleep(1)
-
-
-current_text = select_text()
-main_menu = Menu("What would you like to do?", True, False, current_text.spell_check, suggest_synonyms, display_metrics)
-main_menu.display_menu()
+main()
