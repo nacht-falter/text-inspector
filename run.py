@@ -7,7 +7,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 
 SEPARATOR = "------------------------------"
-STORAGE = {}
+storage = {}
 
 
 class Text:
@@ -316,6 +316,12 @@ class Text:
 
         return total_sentences, sentence_lengths
 
+    def save_text(self):
+        """Save text to storage and go back to text selection"""
+        storage[self.title] = self
+
+        return "break"
+
 
 class Menu:
     """
@@ -370,6 +376,9 @@ class Menu:
                     # Call the function passed to the Menu class according to user selection:
                     self.return_value = self.menu_items[option - 1]()
 
+                    if self.return_value == "break":
+                        break
+
                     if self.repeat == False:
                         break
 
@@ -411,24 +420,33 @@ def create_new_text():
 
 def load_text():
     """Load an existing text from storage"""
-    print("Load existing text")
+    display_header()
+    print("Available texts:\n")
+    if storage:
+        counter = 0
+        for title in storage:
+            print(f"{counter}: {title}")
+            counter += 1
+
+    return storage[input("Please select a text.")]
 
 
 def main():
     """Run the program"""
-    current_text = select_text()
+    while True:
+        current_text = select_text()
 
-    main_menu = Menu(
-        f"Selected text: {current_text.title}\n\nWhat would you like to do?",
-        True,
-        False,
-        current_text.spell_check,
-        current_text.suggest_synonyms,
-        current_text.display_metrics,
-        select_text,
-    )
+        main_menu = Menu(
+            f"Selected text: {current_text.title}\n\nWhat would you like to do?",
+            True,
+            False,
+            current_text.spell_check,
+            current_text.suggest_synonyms,
+            current_text.display_metrics,
+            current_text.save_text,
+        )
 
-    main_menu.display_menu()
+        main_menu.display_menu()
 
 
 main()
