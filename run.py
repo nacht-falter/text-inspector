@@ -4,6 +4,7 @@ import time
 from spellchecker import SpellChecker
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
 
 SEPARATOR = "------------------------------"
 STORAGE = {}
@@ -110,21 +111,59 @@ class Text:
         spell = SpellChecker(language="en")
         # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
         tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
-
         misspelled = spell.unknown(tokenized_text)
         corrected_text = []
-        i = 0
+
+        def display_spelling_suggestions(word, suggestions):
+            """Display suggestions one by one and let user accept, edit or skip to next"""
+            os.system("clear")
+            display_header()
+            print(f"Current text: {self.title}")
+
+            print(f"Possible spelling error found: {word}")
+            print("\nPlease choose one of the following suggestions:\n")
+
+            option_count = 1
+
+            if suggestions is not None:
+                for suggestion in suggestions:
+                    print(f"{option_count}. Replace with: {suggestion}")
+                    option_count += 1
+                    if option_count > 5:
+                        break
+            else:
+                print("No suggestions found")
+
+            print(f"\nPress 'e' to enter custom replacement")
+            print(f"Press 's' to skip")
+
+            while True:
+                option = input("\nPlease choose an option: ")
+
+                try:
+                    if option.isdigit() and int(option) < option_count:
+                        return list(suggestions)[int(option) - 1]
+                    elif option == "e":
+                        return input("Please enter your replacement: ")
+                    elif option == "s":
+                        return word
+                    else:
+                        raise ValueError
+
+                except ValueError:
+                    print(
+                        f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s."
+                    )
+                    time.sleep(2)
 
         for word in tokenized_text:
             # match alphanumeric words including hyphens and underscores: https://stackoverflow.com/questions/34916716/regular-expression-to-match-alphanumeric-hyphen-underscore-and-space-string
             if re.match(r"^[a-zA-Z]([\w-]*[a-zA-Z])?$", word) and word in misspelled:
                 suggestions = spell.candidates(word)
                 # Call display_suggestions method and pass it the current word and its suggestions
-                corrected_text.append(self.display_suggestions(word, suggestions))
+                corrected_text.append(display_spelling_suggestions(word, suggestions))
             else:
                 corrected_text.append(word)
-
-            i += 1
 
         self.text = "".join(corrected_text)
 
@@ -133,47 +172,73 @@ class Text:
 
     def suggest_synonyms(self):
         """Check for repeating words and suggest synonyms"""
-        input("Press Enter to return to Menu")
+        tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
+        # Get most frequent words from count_words() and convert it to dictionary
+        most_used_words = dict(self.count_words()[2])
+        all_sentences = re.split(r"[.!?]+", self.text)
+        corrected_text = []
 
-    def display_suggestions(self, word, suggestions):
-        """Display suggestions one by one and let user accept, edit or skip to next"""
-        os.system("clear")
-        display_header()
-        print(f"Current text: {self.title}")
-        print(f"Spelling error found: {word}")
-        print("\nPlease choose one of the following replacements:\n")
-        option_count = 1
+        def display_synonym_suggestions(word, count, suggestions, context):
+            """Display suggestions one by one and let user accept, edit or skip to next"""
+            os.system("clear")
+            display_header()
+            print(f"Current text: {self.title}\n")
 
-        if suggestions is not None:
-            for suggestion in suggestions:
-                print(f"{option_count}. Replace with: {suggestion}")
-                option_count += 1
-                if option_count > 5:
-                    break
-        else:
-            print("No suggestions found")
+            print(f"This word occurs {count} times in the text: {word}\n")
+            print(f'Here is the whole sentence:\n"{context}"')
+            print("\nHere are a few synonym suggestions:\n")
 
-        print(f"\nPress 'e' to enter custom replacement")
-        print(f"Press 's' to skip")
+            counter = 0
+            if suggestions:
+                for suggestion in suggestions:
+                    if counter < 15:
+                        print(suggestion)
+                    counter += 1
+            else:
+                print("No suggestions found")
 
-        while True:
-            option = input("\nPlease choose an option: ")
+            print(f"\nPress 'e' to enter custom replacement")
+            print(f"Press 's' to skip")
 
-            try:
-                if option.isdigit() and int(option) < option_count:
-                    return list(suggestions)[int(option) - 1]
-                elif option == "e":
-                    return input("Please enter your replacement: ")
-                elif option == "s":
-                    return word
+            while True:
+                option = input("\nPlease choose an option: ")
+
+                try:
+                    if option == "e":
+                        return input("Please enter your replacement: ")
+                    elif option == "s":
+                        return word
+                    else:
+                        raise ValueError
+
+                except ValueError:
+                    print(f"Invalid choice. Please press 'e' to enter a custom replacement or 's' to skip.")
+                    time.sleep(2)
+
+        def get_synonyms(word):
+            """
+            Get synonyms for a word from wordnet:
+            https://towardsdatascience.com/synonyms-and-antonyms-in-python-a865a5e14ce8
+            """
+            synonyms = set()
+            for synonym in wordnet.synsets(word):
+                for lemma in synonym.lemmas():
+                    if lemma.name() != word:
+                        synonyms.add(lemma.name())
+            return synonyms
+
+        for word in tokenized_text:
+            for sentence in all_sentences:
+                if word in sentence and word in most_used_words and most_used_words[word] >= 2:
+                    synonyms = get_synonyms(word)
+                    # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
+                    corrected_text.append(
+                        display_synonym_suggestions(word, most_used_words[word], synonyms, sentence.strip(" \n"))
+                    )
                 else:
-                    raise ValueError
+                    corrected_text.append(word)
 
-            except ValueError:
-                print(
-                    f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s.\n"
-                )
-                time.sleep(2)
+        input("Press Enter to return to Menu")
 
     def display_text(self):
         """Print the revised text to the console"""
