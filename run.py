@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
+from termcolor import colored
 
 SEPARATOR = "------------------------------"
 storage = {}
@@ -41,16 +42,18 @@ class Text:
                 title = str(input("Please enter a title for your text\n"))
 
                 if len(title) == 0:
-                    raise ValueError("The title can't be empty. Please provide a valid title")
+                    raise ValueError(colored("The title can't be empty. Please provide a valid title", "red"))
                 elif not re.match(
                     "^[a-zA-Z0-9 _-]*$", title
                 ):  # https://stackoverflow.com/questions/19970532/how-to-check-a-string-for-a-special-character
-                    raise ValueError("The title cannot contain any special characters or numbers")
+                    raise ValueError(colored("The title cannot contain any special characters or numbers", "red"))
+                elif title in storage:
+                    print(colored("A text with this title already exists. Please choose a different title.", "red"))
                 else:
                     return title
 
             except ValueError as e:
-                print(f"Invalid data: {e}. Please try again.")
+                print(colored(f"Invalid data: {e}. Please try again.", "red"))
 
     def get_text(self):
         """Create a new menu to determine input method"""
@@ -82,12 +85,12 @@ class Text:
                     lines.append(line)
 
                 if len(lines) == 0:
-                    raise ValueError("No input received.")
+                    raise ValueError(colored("No input received.", "red"))
                 else:
                     return "\n".join(lines)
 
             except ValueError as e:
-                print(f"Invalid data: {e}. Please try again.")
+                print(colored(f"Invalid data: {e}. Please try again.", "red"))
 
     def file_input(self):
         """Read text from file"""
@@ -106,7 +109,7 @@ class Text:
                 return "\n".join(lines)
 
             except FileNotFoundError:
-                print("File not found. Please try again with a different file.\n")
+                print(colored("File not found. Please try again with a different file.\n", "red"))
 
     def spell_check(self):
         """Check for spelling errors in the selected text"""
@@ -154,7 +157,10 @@ class Text:
 
                 except ValueError:
                     print(
-                        f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s."
+                        colored(
+                            f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s.",
+                            "red",
+                        )
                     )
                     time.sleep(2)
 
@@ -177,7 +183,6 @@ class Text:
         tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
         # Get most frequent words from count_words() and convert it to dictionary
         most_used_words = dict(self.count_words()[2])
-        all_sentences = re.split(r"[.!?]+", self.text)
         corrected_text = []
 
         def display_synonym_suggestions(word, count, suggestions):
@@ -212,7 +217,11 @@ class Text:
                         raise ValueError
 
                 except ValueError:
-                    print(f"Invalid choice. Please press 'e' to enter a custom replacement or 's' to skip.")
+                    print(
+                        colored(
+                            f"Invalid choice. Please press 'e' to enter a custom replacement or 's' to skip.", "red"
+                        )
+                    )
                     time.sleep(2)
 
         def get_synonyms(word):
@@ -395,7 +404,7 @@ class Menu:
                     raise ValueError
 
             except ValueError:
-                print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
+                print(colored(f"Invalid choice. Please enter a number between 1 and {option_count}.\n", "red"))
                 time.sleep(2)
 
         return self.return_value
@@ -465,7 +474,11 @@ def load_text():
                 raise ValueError
 
         except ValueError:
-            print(f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}\n")
+            print(
+                colored(
+                    f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}\n", "red"
+                )
+            )
             time.sleep(2)
 
 
