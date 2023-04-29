@@ -390,7 +390,7 @@ class Menu:
 
             except ValueError:
                 print(f"Invalid choice. Please enter a number between 1 and {option_count}.\n")
-                time.sleep(1)
+                time.sleep(2)
 
         return self.return_value
 
@@ -405,7 +405,11 @@ def display_header():
 
 def select_text():
     """Create a new text or load an existing one"""
-    select_text_menu = Menu("What would you like to do?", False, True, create_new_text, load_text)
+    if storage:
+        select_text_menu = Menu("What would you like to do?", False, True, create_new_text, load_text)
+    else:
+        select_text_menu = Menu("What would you like to do?", False, True, create_new_text)
+
     text = select_text_menu.display_menu()
 
     return text
@@ -420,15 +424,43 @@ def create_new_text():
 
 def load_text():
     """Load an existing text from storage"""
-    display_header()
-    print("Available texts:\n")
-    if storage:
-        counter = 0
+    while True:
+        display_header()
+        print("Available texts:\n")
+
+        counter = 1
+
         for title in storage:
             print(f"{counter}: {title}")
             counter += 1
+        print("\nPress 'd' to display a text.")
+        print("Press 's' to select a text.")
 
-    return storage[input("Please select a text.")]
+        option = input("\nPlease select an option: ")
+
+        try:
+            if option == "d":
+                index = int(input("Please choose a text: "))
+
+                if index < counter:
+                    print(f"\nTitle: {list(storage.keys())[index - 1]}")
+                    print(list(storage.values())[index - 1].text)
+                    input("\nPress Enter to go back")
+                else:
+                    raise ValueError
+
+            elif option == "s":
+                index = int(input("Please choose a text:\n"))
+                if index < counter:
+                    return list(storage.values())[index - 1]
+                else:
+                    raise ValueError
+            else:
+                raise ValueError
+
+        except ValueError:
+            print(f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}\n")
+            time.sleep(2)
 
 
 def main():
