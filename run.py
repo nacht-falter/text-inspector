@@ -5,6 +5,7 @@ from spellchecker import SpellChecker
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
+from nltk.corpus import stopwords
 
 SEPARATOR = "------------------------------"
 storage = {}
@@ -116,7 +117,6 @@ class Text:
 
         def display_spelling_suggestions(word, suggestions):
             """Display suggestions one by one and let user accept, edit or skip to next"""
-            os.system("clear")
             display_header()
             print(f"Current text: {self.title}")
 
@@ -178,14 +178,12 @@ class Text:
         all_sentences = re.split(r"[.!?]+", self.text)
         corrected_text = []
 
-        def display_synonym_suggestions(word, count, suggestions, context):
+        def display_synonym_suggestions(word, count, suggestions):
             """Display suggestions one by one and let user accept, edit or skip to next"""
-            os.system("clear")
             display_header()
             print(f"Current text: {self.title}\n")
 
             print(f"This word occurs {count} times in the text: {word}\n")
-            print(f'Here is the whole sentence:\n"{context}"')
             print("\nHere are a few synonym suggestions:\n")
 
             counter = 0
@@ -221,24 +219,28 @@ class Text:
             https://towardsdatascience.com/synonyms-and-antonyms-in-python-a865a5e14ce8
             """
             synonyms = set()
+            # Filter out common words by using stop words: https://pythonspot.com/nltk-stop-words/
             for synonym in wordnet.synsets(word):
                 for lemma in synonym.lemmas():
-                    if lemma.name() != word:
+                    lemma_name = lemma.name()
+                    if lemma_name != word and lemma_name:
                         synonyms.add(lemma.name())
             return synonyms
 
+        suggested_words = []
         for word in tokenized_text:
-            for sentence in all_sentences:
-                if word in sentence and word in most_used_words and most_used_words[word] >= 2:
-                    synonyms = get_synonyms(word)
-                    # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
-                    corrected_text.append(
-                        display_synonym_suggestions(word, most_used_words[word], synonyms, sentence.strip(" \n"))
-                    )
-                else:
-                    corrected_text.append(word)
+            if word in most_used_words and word not in suggested_words and most_used_words[word] >= 4:
+                synonyms = get_synonyms(word)
+                suggested_words.append(word)
+                # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
+                corrected_text.append(display_synonym_suggestions(word, most_used_words[word], synonyms))
+            else:
+                corrected_text.append(word)
 
-        input("Press Enter to return to Menu")
+        self.text = "".join(corrected_text)
+
+        display_header()
+        self.display_text()
 
     def display_text(self):
         """Print the revised text to the console"""
@@ -264,7 +266,7 @@ class Text:
         print(f"Shortest sentence: {min(sentence_lengths)} words")
         print(f"Average words per sentence: {round(total_words / total_sentences)}")
 
-        print(f"\nMost used words (lemmatized, not including short words with less than 4 characters):")
+        print(f"\nMost used words (lemmatized, not including very common words):")
 
         counter = 0
         for lemma, occurences in most_used_words:
@@ -280,6 +282,7 @@ class Text:
 
         # Tokenize text with nltk.tokenize. NLTK documentation: https://www.nltk.org/api/nltk.tokenize.html?highlight=tokenize#module-nltk.tokenize
         tokenized_text = word_tokenize(self.text)
+        stop_words = set(stopwords.words("english"))
         lemmas = {}
         unique_words = set()
 
@@ -291,10 +294,11 @@ class Text:
                 lemmatizer = WordNetLemmatizer()
                 lemma = lemmatizer.lemmatize(word)
 
-                if lemma in lemmas and len(word) > 3:
-                    lemmas[lemma] += 1
-                else:
-                    lemmas[lemma] = 1
+                if word not in stop_words and len(word) > 3:
+                    if lemma in lemmas:
+                        lemmas[lemma] += 1
+                    else:
+                        lemmas[lemma] = 1
 
         # Sort the dictionary: https://realpython.com/sort-python-dictionary/#getting-keys-values-or-both-from-a-dictionary
         most_used_words = sorted(lemmas.items(), key=lambda item: item[1], reverse=True)
