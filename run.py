@@ -106,7 +106,7 @@ class Text:
                 lines = f.read()
                 f.close()
 
-                return "\n".join(lines)
+                return lines
 
             except FileNotFoundError:
                 print(colored("File not found. Please try again with a different file.\n", "red"))
