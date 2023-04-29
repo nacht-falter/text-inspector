@@ -62,7 +62,7 @@ class Text:
 
     def user_input(self):
         """Read text from user input"""
-        print("Please enter or paste your text. To save your input enter a new line and press Ctrl-D.\n")
+        print("Please enter or paste your text. To save your input enter 'Done!' on a new line and press Enter.\n")
 
         lines = []
 
@@ -75,6 +75,8 @@ class Text:
                 while True:
                     try:
                         line = input()
+                        if line == "Done!":
+                            break
                     except EOFError:
                         break
                     lines.append(line)
@@ -454,7 +456,7 @@ def load_text():
                     raise ValueError
 
             elif option == "s":
-                index = int(input("Please choose a text:\n"))
+                index = int(input("Please choose a text:"))
                 if index < counter:
                     return list(storage.values())[index - 1]
                 else:
