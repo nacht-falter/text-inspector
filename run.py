@@ -495,6 +495,41 @@ def load_text():
 
 def import_texts():
     """Import stored texts with recovery key"""
+    print("Would you like to import texts from a previous session?")
+
+    option = input("Please enter 'yes' or 'no'.\n")
+    while True:
+        try:
+            if option.lower() == "yes":
+                try:
+                    recovery_key = input("Please enter your recovery key: ")
+                    worksheet = SHEET.worksheet(recovery_key)
+                    if worksheet:
+                        print("\nImporting texts.")
+                        texts = worksheet.get_all_values()
+                        for text in texts:
+                            new_text = Text(False)
+                            new_text.title = text[0]
+                            new_text.text = text[1]
+                            storage[new_text.title] = new_text
+                            # Make recovery_key accessible on global scope in order to reuse it for the next export:
+                            global user_recovery_key
+                            user_recovery_key = recovery_key
+                        print("\nYour texts have been successfully recovered.")
+                        break
+                    else:
+                        raise Exception
+
+                except Exception:
+                    print(colored("Invalid recovery key. Please try again with a valid key.", "red"))
+            elif option.lower() == "no":
+                print("Ok! Continuing without import.")
+                break
+            else:
+                raise ValueError
+
+        except ValueError:
+            print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No'.", "red"))
 
 
 def exit_program():
@@ -528,9 +563,16 @@ def exit_program():
 def export_texts():
     """Export texts to Google spreadsheet"""
     print(f"\nUpdating text storage...")
-    # Generate random string: https://stackoverflow.com/questions/2030053/how-to-generate-random-strings-in-python
-    letters = string.ascii_letters
-    recovery_key = "".join(random.choice(letters) for i in range(15))
+
+    if user_recovery_key:
+        recovery_key = user_recovery_key
+        # Delete the old worksheet: https://docs.gspread.org/en/latest/user-guide.html#deleting-a-worksheet
+        worksheet = SHEET.worksheet(recovery_key)
+        SHEET.del_worksheet(worksheet)
+    else:
+        # Generate random string: https://stackoverflow.com/questions/2030053/how-to-generate-random-strings-in-python
+        letters = string.ascii_letters
+        recovery_key = "".join(random.choice(letters) for i in range(10))
 
     # Create new worksheet in spreadsheet: https://docs.gspread.org/en/latest/user-guide.html#creating-a-worksheet
     worksheet = SHEET.add_worksheet(title=recovery_key, rows=len(storage), cols=2)
@@ -540,7 +582,12 @@ def export_texts():
         worksheet.append_row(row)
 
     print("\nYour texts have been successfully stored in the database.")
-    print(f"You can import them with the following recovery key: {colored(recovery_key, 'green')}")
+
+    if user_recovery_key:
+        print(f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'green')}")
+    else:
+        print(f"You can import them with the following recovery key: {colored(recovery_key, 'green')}")
+
     print("Please copy the key and save it.")
     input("\nPress Enter to exit.")
 
@@ -548,6 +595,7 @@ def export_texts():
 def main():
     """Run the program"""
     display_header()
+    import_texts()
 
     while True:
         current_text = select_text()
