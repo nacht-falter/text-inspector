@@ -69,11 +69,14 @@ class Text:
 
     def get_text(self):
         """Create a new menu to determine input method"""
-        input_method_menu = Menu(
-            "Please choose an input method for your text.", False, False, self.user_input, self.file_input
-        )
+        while True:
+            input_method_menu = Menu(
+                "Please choose an input method for your text.", False, False, self.user_input, self.file_input
+            )
+            text = input_method_menu.display_menu()
 
-        return input_method_menu.display_menu()
+            if text is not None:
+                return text
 
     def user_input(self):
         """Read text from user input"""
@@ -107,18 +110,19 @@ class Text:
     def file_input(self):
         """Read text from file"""
         while True:
+            print("Please enter the name of your file or press 'b' to go back")
             try:
-                file_name = str(
-                    input(
-                        "Please enter the name of the file you want to check\nType example1.txt or example2.txt for examples).\n"
-                    )
-                )
-
-                f = open(f"{file_name}", "r")
-                lines = f.read()
-                f.close()
-
-                return lines
+                user_input = input("Enter 'example1.txt' or 'example2.md' for examples).\n")
+                if user_input == "b":
+                    return None
+                else:
+                    f = open(f"{user_input}", "r")
+                    lines = f.read()
+                    f.close()
+                    print("\nSuccess! Here is the text from your file:\n")
+                    print(lines)
+                    input("Press Enter to continue.")
+                    return lines
 
             except FileNotFoundError:
                 print(colored("File not found. Please try again with a different file.\n", "red"))
