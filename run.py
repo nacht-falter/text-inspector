@@ -50,7 +50,7 @@ class Text:
         """Get instance title from user input"""
         while True:
             try:
-                title = str(input("Please enter a title for your text\n"))
+                title = str(input("Please enter a title for your text:\n"))
 
                 if len(title) == 0:
                     # Colorize terminal output: https://stackoverflow.com/questions/37340049/how-do-i-print-colored-output-to-the-terminal-in-python
@@ -70,7 +70,7 @@ class Text:
     def get_text(self):
         """Create a new menu to determine input method"""
         input_method_menu = Menu(
-            "Please choose an input method for your text", False, False, self.user_input, self.file_input
+            "Please choose an input method for your text.", False, False, self.user_input, self.file_input
         )
 
         return input_method_menu.display_menu()
@@ -110,7 +110,7 @@ class Text:
             try:
                 file_name = str(
                     input(
-                        "Please enter the name of the file you want to check\nType example1.txt or example2.txt for examples)\n"
+                        "Please enter the name of the file you want to check\nType example1.txt or example2.txt for examples).\n"
                     )
                 )
 
@@ -137,7 +137,7 @@ class Text:
             display_header()
             print(f"Current text: {self.title}")
 
-            print(f"Possible spelling error found: {word}")
+            print(f"\nPossible spelling error found: {word}.")
             print("\nPlease choose one of the following suggestions:\n")
 
             option_count = 1
@@ -155,13 +155,13 @@ class Text:
             print(f"Press 's' to skip")
 
             while True:
-                option = input("\nPlease choose an option: ")
+                option = input("\nPlease choose an option:\n")
 
                 try:
                     if option.isdigit() and int(option) < option_count:
                         return list(suggestions)[int(option) - 1]
                     elif option == "e":
-                        return input("Please enter your replacement: ")
+                        return input("Please enter your replacement:\n")
                     elif option == "s":
                         return word
                     else:
@@ -218,11 +218,11 @@ class Text:
             print(f"Press 's' to skip")
 
             while True:
-                option = input("\nPlease choose an option: ")
+                option = input("\nPlease choose an option:\n")
 
                 try:
                     if option == "e":
-                        return input("Please enter your replacement: ")
+                        return input("Please enter your replacement:\n")
                     elif option == "s":
                         return word
                     else:
@@ -271,7 +271,7 @@ class Text:
         print(f"{SEPARATOR}\n")
         print(self.text)
         print(f"\n{SEPARATOR}")
-        input("\nPress Enter to return to menu.")
+        input("\nPress Enter to return to menu.\n")
 
     def display_metrics(self):
         """Display metrics for the seleced text"""
@@ -297,7 +297,7 @@ class Text:
                 print(f"{lemma}: {occurences}")
             counter += 1
 
-        input("\nPress Enter to return to menu.")
+        input("\nPress Enter to return to menu.\n")
 
     def count_words(self):
         """Get total word count, unique word count, and word frequency"""
@@ -394,7 +394,7 @@ class Menu:
                 print(f"{i}. Exit program")
                 option_count += 1
 
-            option = input("\nPlease choose an option: ")
+            option = input("\nPlease choose an option:\n")
 
             try:
                 option = int(option)
@@ -462,21 +462,21 @@ def load_text():
         print("\nPress 'd' to display a text.")
         print("Press 's' to select a text.")
 
-        option = input("\nPlease select an option: ")
+        option = input("\nPlease select an option:\n")
 
         try:
             if option == "d":
-                index = int(input("Please choose a text: "))
+                index = int(input("Please choose a text:\n"))
 
                 if index < counter:
                     print(f"\nTitle: {list(storage.keys())[index - 1]}")
                     print(list(storage.values())[index - 1].text)
-                    input("\nPress Enter to go back")
+                    input("\nPress Enter to go back\n")
                 else:
                     raise ValueError
 
             elif option == "s":
-                index = int(input("Please choose a text:"))
+                index = int(input("Please choose a text:\n"))
                 if index < counter:
                     return list(storage.values())[index - 1]
                 else:
@@ -487,7 +487,7 @@ def load_text():
         except ValueError:
             print(
                 colored(
-                    f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}\n", "red"
+                    f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}.\n", "red"
                 )
             )
             time.sleep(2)
@@ -505,7 +505,7 @@ def import_texts():
                     recovery_key = input("Please enter your recovery key: ")
                     worksheet = SHEET.worksheet(recovery_key)
                     if worksheet:
-                        print("\nImporting texts.")
+                        print("\nImporting texts ...")
                         texts = worksheet.get_all_values()
                         for text in texts:
                             new_text = Text(False)
@@ -537,7 +537,7 @@ def exit_program():
     display_header()
     if storage:
         print("Before you go ...")
-        print("\nWould you like to save your texts to the database (hosted on Google Drive)?")
+        print("\nWould you like to save your texts to the database?")
         print("If so, please make sure your texts don't contain any sensitive information.\n")
 
         while True:
@@ -562,7 +562,7 @@ def exit_program():
 
 def export_texts():
     """Export texts to Google spreadsheet"""
-    print(f"\nUpdating text storage...")
+    print(f"\nUpdating text storage ...")
 
     if user_recovery_key:
         recovery_key = user_recovery_key
@@ -589,7 +589,7 @@ def export_texts():
         print(f"You can import them with the following recovery key: {colored(recovery_key, 'green')}")
 
     print("Please copy the key and save it.")
-    input("\nPress Enter to exit.")
+    input("\nPress Enter to exit\n")
 
 
 def main():
