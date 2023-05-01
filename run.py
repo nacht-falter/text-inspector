@@ -1,12 +1,22 @@
-import os
-import re
-import time
+import os, time, re, random, string, gspread
 from spellchecker import SpellChecker
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 from termcolor import colored
+from google.oauth2.service_account import Credentials
+
+# Google Drive API integration:
+SCOPE = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
+]
+CREDS = Credentials.from_service_account_file("creds.json")
+SCOPED_CREDS = CREDS.with_scopes(SCOPE)
+GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
+SHEET = GSPREAD_CLIENT.open("text-inspector-storage")
 
 SEPARATOR = "------------------------------"
 storage = {}
@@ -31,9 +41,10 @@ class Text:
     - display_metrics(): Display text metrics
     """
 
-    def __init__(self):
-        self.title = self.get_title()
-        self.text = self.get_text()
+    def __init__(self, new_text):
+        if new_text:
+            self.title = self.get_title()
+            self.text = self.get_text()
 
     def get_title(self):
         """Get instance title from user input"""
@@ -42,6 +53,7 @@ class Text:
                 title = str(input("Please enter a title for your text\n"))
 
                 if len(title) == 0:
+                    # Colorize terminal output: https://stackoverflow.com/questions/37340049/how-do-i-print-colored-output-to-the-terminal-in-python
                     raise ValueError(colored("The title can't be empty. Please provide a valid title", "red"))
                 elif not re.match(
                     "^[a-zA-Z0-9 _-]*$", title
@@ -398,8 +410,7 @@ class Menu:
                         break
 
                 elif self.exit_option == True and option == option_count:
-                    print("Exiting. Thank you for using Text Inspector!")
-                    exit()
+                    exit_program()
                 else:
                     raise ValueError
 
@@ -432,7 +443,7 @@ def select_text():
 
 def create_new_text():
     """Create a new text from command line input or from file"""
-    new_text = Text()
+    new_text = Text(True)
 
     return new_text
 
@@ -482,8 +493,62 @@ def load_text():
             time.sleep(2)
 
 
+def import_texts():
+    """Import stored texts with recovery key"""
+
+
+def exit_program():
+    """Function to run on exit"""
+    display_header()
+    if storage:
+        print("Before you go ...")
+        print("\nWould you like to save your texts to the database (hosted on Google Drive)?")
+        print("If so, please make sure your texts don't contain any sensitive information.\n")
+
+        while True:
+            option = input("Please enter 'yes' or 'no'.\n")
+
+            try:
+                if option.lower() == "yes":
+                    export_texts()
+                    break
+                elif option.lower() == "no":
+                    print("Ok! Your texts have been deleted.")
+                    break
+                else:
+                    raise ValueError
+
+            except ValueError:
+                print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No'.", "red"))
+
+    print("\nExiting. Thank you for using Text Inspector!")
+    exit()
+
+
+def export_texts():
+    """Export texts to Google spreadsheet"""
+    print(f"\nUpdating text storage...")
+    # Generate random string: https://stackoverflow.com/questions/2030053/how-to-generate-random-strings-in-python
+    letters = string.ascii_letters
+    recovery_key = "".join(random.choice(letters) for i in range(15))
+
+    # Create new worksheet in spreadsheet: https://docs.gspread.org/en/latest/user-guide.html#creating-a-worksheet
+    worksheet = SHEET.add_worksheet(title=recovery_key, rows=len(storage), cols=2)
+
+    for title in storage:
+        row = [storage[title].title, storage[title].text]
+        worksheet.append_row(row)
+
+    print("\nYour texts have been successfully stored in the database.")
+    print(f"You can import them with the following recovery key: {colored(recovery_key, 'green')}")
+    print("Please copy the key and save it.")
+    input("\nPress Enter to exit.")
+
+
 def main():
     """Run the program"""
+    display_header()
+
     while True:
         current_text = select_text()
 
