@@ -155,8 +155,8 @@ class Text:
             else:
                 print("No suggestions found")
 
-            print(f"\nPress 'e' to enter custom replacement")
-            print(f"Press 's' to skip")
+            print("\nPress 'e' to enter custom replacement")
+            print("Press 's' to skip")
 
             while True:
                 option = input("\nPlease choose an option:\n")
@@ -201,13 +201,18 @@ class Text:
         most_used_words = dict(self.count_words()[2])
         corrected_text = []
 
-        def display_synonym_suggestions(word, count, suggestions):
+        def display_synonym_suggestions(word, count, suggestions, total, index):
             """Display suggestions one by one and let user accept, edit or skip to next"""
             display_header()
-            print(f"Current text: {self.title}\n")
-
-            print(f"This word occurs {count} times in the text: {word}\n")
-            print("\nHere are a few synonym suggestions:\n")
+            print(SEPARATOR)
+            print("Synonym Suggestions")
+            print(SEPARATOR)
+            print(f"Current text: {colored(self.title, 'yellow')}\n")
+            print(f"{total} frequently used words found.\n")
+            print(
+                f"The word '{colored(word, 'red')}' occurs {count} times in the text. Here are a few synonyms, which you might consider using instead:"
+            )
+            print(f"(Suggestion {index} of {total})\n")
 
             counter = 0
             if suggestions:
@@ -218,27 +223,7 @@ class Text:
             else:
                 print("No suggestions found")
 
-            print(f"\nPress 'e' to enter custom replacement")
-            print(f"Press 's' to skip")
-
-            while True:
-                option = input("\nPlease choose an option:\n")
-
-                try:
-                    if option == "e":
-                        return input("Please enter your replacement:\n")
-                    elif option == "s":
-                        return word
-                    else:
-                        raise ValueError
-
-                except ValueError:
-                    print(
-                        colored(
-                            f"Invalid choice. Please press 'e' to enter a custom replacement or 's' to skip.", "red"
-                        )
-                    )
-                    time.sleep(2)
+            input("\nPress Enter to go to next suggestion")
 
         def get_synonyms(word):
             """
@@ -255,16 +240,15 @@ class Text:
             return synonyms
 
         suggested_words = []
+        index = 1
+        repeating_words = set(word for word in tokenized_text if word in most_used_words and most_used_words[word] >= 4)
         for word in tokenized_text:
-            if word in most_used_words and word not in suggested_words and most_used_words[word] >= 4:
+            if word in repeating_words and word not in suggested_words:
                 synonyms = get_synonyms(word)
                 suggested_words.append(word)
                 # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
-                corrected_text.append(display_synonym_suggestions(word, most_used_words[word], synonyms))
-            else:
-                corrected_text.append(word)
-
-        self.text = "".join(corrected_text)
+                display_synonym_suggestions(word, most_used_words[word], synonyms, len(repeating_words), index)
+                index += 1
 
         display_header()
         self.display_text()
