@@ -1,1 +1,10 @@
-# Your requirements go here
+google-auth==2.17.3
+google-auth-oauthlib==1.0.0
+gspread==5.8.0
+nltk==3.8.1
+oauthlib==3.2.2
+pyspellchecker==0.7.2
+regex==2023.3.23
+requests==2.27.1
+requests-oauthlib==1.3.1
+termcolor==2.2.0
