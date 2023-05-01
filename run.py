@@ -497,8 +497,8 @@ def import_texts():
     """Import stored texts with recovery key"""
     print("Would you like to import texts from a previous session?")
 
-    option = input("Please enter 'yes' or 'no'.\n")
     while True:
+        option = input("Please enter 'yes' or 'no'.\n")
         try:
             if option.lower() == "yes":
                 try:
