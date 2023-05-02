@@ -31,14 +31,18 @@ class Text:
     - text: Text contents provided by user
 
     Methods:
+    - get_title(): Get the title for the text from user
     - get_text(): Display a menu to select an input method
     - user_input(): Read text from command line interface
     - file_input(): Read text from file
     - spell_check(): Run a spell check on text
     - suggest_synonyms(): Suggest synonyms for repeated words
-    - display_suggestions(): Display suggestions and let user confirm, skip or enter custom word
+    - no_suggestions(): Display a message when there are no suggestions
     - display_text(): Prints the revised text to the console
     - display_metrics(): Display text metrics
+    - count_words(): Get total word count, unique word count, and word frequency
+    - count_sentences(): Get total sentence count, longest/shortest sentence and average words per sentence
+    - save_text(): Add the text item to storage
     """
 
     def __init__(self, new_text):
