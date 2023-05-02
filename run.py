@@ -199,6 +199,7 @@ class Text:
                     corrected_text.append(word)
 
             self.text = "".join(corrected_text)
+
             display_header()
             self.display_text()
         else:
@@ -209,7 +210,6 @@ class Text:
         tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
         # Get most frequent words from count_words() and convert it to dictionary
         most_used_words = dict(self.count_words()[2])
-        corrected_text = []
 
         def display_synonym_suggestions(word, count, suggestions, total, index):
             """Display suggestions one by one and let user accept, edit or skip to next"""
@@ -249,19 +249,22 @@ class Text:
                         synonyms.add(lemma.name())
             return synonyms
 
-        suggested_words = []
-        index = 1
         repeating_words = set(word for word in tokenized_text if word in most_used_words and most_used_words[word] >= 4)
-        for word in tokenized_text:
-            if word in repeating_words and word not in suggested_words:
-                synonyms = get_synonyms(word)
-                suggested_words.append(word)
-                # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
-                display_synonym_suggestions(word, most_used_words[word], synonyms, len(repeating_words), index)
-                index += 1
+        index = 1
+        suggested_words = []
+        if len(repeating_words) != 0:
+            for word in tokenized_text:
+                if word in repeating_words and word not in suggested_words:
+                    synonyms = get_synonyms(word)
+                    suggested_words.append(word)
+                    # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
+                    display_synonym_suggestions(word, most_used_words[word], synonyms, len(repeating_words), index)
+                    index += 1
 
-        display_header()
-        self.display_text()
+            display_header()
+            self.display_text()
+        else:
+            self.no_suggestions("Synonyms")
 
     def no_suggestions(self, method):
         """Display a message when there are no suggestions"""
