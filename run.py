@@ -137,8 +137,9 @@ class Text:
         # pyspellchecker documentation: https://pyspellchecker.readthedocs.io/en/latest/
         spell = SpellChecker(language="en")
         # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
-        tokenized_text = re.findall(r"[\w'’-]+|[ .,!?@#$%&*;:<>=()[\]{}–—\n]", self.text)
-        misspelled = {word for word in spell.unknown(tokenized_text) if word != "\n"}
+        tokenized_text = re.findall(r"[a-zA-Z0-9ʼ'’_-]+|[^a-zA-Z0-9'ʼ’_-]", self.text)
+        all_words = re.findall(r"[a-zA-Z0-9ʼ'’_-]+", self.text)
+        misspelled = [word for word in all_words if spell.unknown([word])]
 
         corrected_text = []
 
@@ -206,8 +207,7 @@ class Text:
         index = 1
         if len(misspelled) != 0:
             for word in tokenized_text:
-                # match alphanumeric words including hyphens and underscores: https://stackoverflow.com/questions/34916716/regular-expression-to-match-alphanumeric-hyphen-underscore-and-space-string
-                if re.match(r"^[a-zA-Z]([\w-]*[a-zA-Z])?$", word) and word in misspelled:
+                if word in misspelled:
                     suggestions = spell.candidates(word)
                     # Call display_suggestions method and pass it the current word and its suggestions
                     corrected_text.append(display_spelling_suggestions(word, suggestions, len(misspelled), index))
