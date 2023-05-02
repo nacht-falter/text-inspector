@@ -595,7 +595,7 @@ def import_texts():
 def exit_program():
     """Function to run on exit"""
     display_header()
-    exit_flag = False
+    exit_flag = True
     if storage:
         print("Before you go ...")
         print("\nWould you like to save your texts to the database?")
@@ -607,13 +607,12 @@ def exit_program():
             try:
                 if option.lower() == "yes":
                     export_texts()
-                    exit_flag = True
                     break
                 elif option.lower() == "no":
-                    print(colored("Ok! Your texts have been deleted.", "green"))
-                    exit_flag = True
+                    print(colored("OK, your changes have not been stored.", "green"))
                     break
                 elif option == "b":
+                    exit_flag = False
                     break
                 else:
                     raise ValueError
