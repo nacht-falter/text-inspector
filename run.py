@@ -132,16 +132,22 @@ class Text:
         # pyspellchecker documentation: https://pyspellchecker.readthedocs.io/en/latest/
         spell = SpellChecker(language="en")
         # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
-        tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
-        misspelled = spell.unknown(tokenized_text)
+        tokenized_text = re.findall(r"[\w'’-]+|[ .,!?@#$%&*;:<>=()[\]{}–—\n]", self.text)
+        misspelled = {word for word in spell.unknown(tokenized_text) if word != "\n"}
+
         corrected_text = []
 
-        def display_spelling_suggestions(word, suggestions):
+        def display_spelling_suggestions(word, suggestions, total, index):
             """Display suggestions one by one and let user accept, edit or skip to next"""
             display_header()
-            print(f"Current text: {self.title}")
+            print(SEPARATOR)
+            print("Spell check")
+            print(SEPARATOR)
+            print(f"Current text: {colored(self.title, 'yellow')}")
 
-            print(f"\nPossible spelling error found: {word}.")
+            print(f"\n{total} possible spelling errors found.")
+            print(f"\nPossible spelling error: {colored(word, 'red')}.")
+            print(f"(Error {index} of {total})")
             print("\nPlease choose one of the following suggestions:\n")
 
             option_count = 1
@@ -180,19 +186,23 @@ class Text:
                     )
                     time.sleep(2)
 
-        for word in tokenized_text:
-            # match alphanumeric words including hyphens and underscores: https://stackoverflow.com/questions/34916716/regular-expression-to-match-alphanumeric-hyphen-underscore-and-space-string
-            if re.match(r"^[a-zA-Z]([\w-]*[a-zA-Z])?$", word) and word in misspelled:
-                suggestions = spell.candidates(word)
-                # Call display_suggestions method and pass it the current word and its suggestions
-                corrected_text.append(display_spelling_suggestions(word, suggestions))
-            else:
-                corrected_text.append(word)
+        index = 1
+        if len(misspelled) != 0:
+            for word in tokenized_text:
+                # match alphanumeric words including hyphens and underscores: https://stackoverflow.com/questions/34916716/regular-expression-to-match-alphanumeric-hyphen-underscore-and-space-string
+                if re.match(r"^[a-zA-Z]([\w-]*[a-zA-Z])?$", word) and word in misspelled:
+                    suggestions = spell.candidates(word)
+                    # Call display_suggestions method and pass it the current word and its suggestions
+                    corrected_text.append(display_spelling_suggestions(word, suggestions, len(misspelled), index))
+                    index += 1
+                else:
+                    corrected_text.append(word)
 
-        self.text = "".join(corrected_text)
-
-        display_header()
-        self.display_text()
+            self.text = "".join(corrected_text)
+            display_header()
+            self.display_text()
+        else:
+            self.no_suggestions("Spell check")
 
     def suggest_synonyms(self):
         """Check for repeating words and suggest synonyms"""
@@ -252,6 +262,18 @@ class Text:
 
         display_header()
         self.display_text()
+
+    def no_suggestions(self, method):
+        """Display a message when there are no suggestions"""
+        display_header()
+        print(SEPARATOR)
+        print(method)
+        print(f"{SEPARATOR}\n")
+        if method == "Spell check":
+            print("No spelling errors found")
+        else:
+            print("No suggestions found.")
+        input("\nPress Enter to return to menu.\n")
 
     def display_text(self):
         """Print the revised text to the console"""
