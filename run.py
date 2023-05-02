@@ -80,7 +80,9 @@ class Text:
 
     def user_input(self):
         """Read text from user input"""
-        print("Please enter or paste your text. To save your input enter 'Done!' on a new line and press Enter.\n")
+        print("Please enter or paste your text.")
+        print("To save your input enter 'Done!' on a new line and press Enter.")
+        print("To select a different input method enter 'Go back!' on a new line and press Enter.\n")
 
         lines = []
 
@@ -95,6 +97,8 @@ class Text:
                         line = input()
                         if line == "Done!":
                             break
+                        elif line == "Go back!":
+                            return None
                     except EOFError:
                         break
                     lines.append(line)
@@ -110,7 +114,8 @@ class Text:
     def file_input(self):
         """Read text from file"""
         while True:
-            print("Please enter the name of your file or press 'b' to go back")
+            print("Please enter the name of your file.")
+            print("To select a different input method press 'b' and hit Enter.")
             try:
                 user_input = input("Enter 'example1.txt' or 'example2.md' for examples).\n")
                 if user_input == "b":
