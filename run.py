@@ -151,7 +151,7 @@ class Text:
             print(f"Current text: {colored(self.title, 'yellow')}")
 
             print(f"\n{total} possible spelling errors found.")
-            print(f"\nPossible spelling error: {colored(word, 'red')}.")
+            print(f"\nPossible spelling error: {colored(word, 'red')}")
             print(f"(Error {index} of {total})")
             print("\nPlease choose one of the following suggestions:\n")
 
@@ -176,7 +176,19 @@ class Text:
                     if option.isdigit() and int(option) < option_count:
                         return list(suggestions)[int(option) - 1]
                     elif option == "e":
-                        return input("Please enter your replacement:\n")
+                        while True:
+                            replacement = input("Please enter your replacement:\n")
+                            try:
+                                if len(replacement) == 0:
+                                    raise ValueError
+                                else:
+                                    return replacement
+                            except ValueError:
+                                print(
+                                    colored(
+                                        "The replacement can't be an empty string. Please enter a replacement.", "red"
+                                    )
+                                )
                     elif option == "s":
                         return word
                     else:
