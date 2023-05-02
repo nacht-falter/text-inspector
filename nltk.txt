@@ -1,4 +1,3 @@
-tokenize
-stem
+punkt
 wordnet
 stopwords
