@@ -565,29 +565,35 @@ def import_texts():
 def exit_program():
     """Function to run on exit"""
     display_header()
+    exit_flag = False
     if storage:
         print("Before you go ...")
         print("\nWould you like to save your texts to the database?")
         print("If so, please make sure your texts don't contain any sensitive information.\n")
 
         while True:
-            option = input("Please enter 'yes' or 'no'.\n")
+            option = input("Please enter 'yes' or 'no'.\nEnter 'b' to go back.\n")
 
             try:
                 if option.lower() == "yes":
                     export_texts()
+                    exit_flag = True
                     break
                 elif option.lower() == "no":
                     print(colored("Ok! Your texts have been deleted.", "green"))
+                    exit_flag = True
+                    break
+                elif option == "b":
                     break
                 else:
                     raise ValueError
 
             except ValueError:
-                print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No'.", "red"))
+                print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No' or enter 'b' to abort.", "red"))
 
-    print("\nExiting. Thank you for using" + colored("Text Inspector!", "cyan"))
-    exit()
+    if exit_flag:
+        print("\nExiting. Thank you for using " + colored("Text Inspector!", "cyan"))
+        exit()
 
 
 def export_texts():
