@@ -513,33 +513,36 @@ def load_text():
 
 def import_texts():
     """Import stored texts with recovery key"""
-    print("Would you like to import texts from a previous session?")
-
     while True:
+        print("Would you like to import texts from a previous session?")
         option = input("Please enter 'yes' or 'no'.\n")
         try:
             if option.lower() == "yes":
-                try:
-                    recovery_key = input("Please enter your recovery key: ")
-                    worksheet = SHEET.worksheet(recovery_key)
-                    if worksheet:
-                        print("\nImporting texts ...")
-                        texts = worksheet.get_all_values()
-                        for text in texts:
-                            new_text = Text(False)
-                            new_text.title = text[0]
-                            new_text.text = text[1]
-                            storage[new_text.title] = new_text
-                            # Make recovery_key accessible on global scope in order to reuse it for the next export:
-                            global user_recovery_key
-                            user_recovery_key = recovery_key
-                        print("\nYour texts have been successfully recovered.")
-                        break
-                    else:
-                        raise Exception
+                while True:
+                    try:
+                        user_input = input("Please enter your recovery key or enter 'b' to go back:\n")
+                        if user_input == "b":
+                            break
+                        else:
+                            worksheet = SHEET.worksheet(recovery_key)
+                            if worksheet:
+                                print("\nImporting texts ...")
+                                texts = worksheet.get_all_values()
+                                for text in texts:
+                                    new_text = Text(False)
+                                    new_text.title = text[0]
+                                    new_text.text = text[1]
+                                    storage[new_text.title] = new_text
+                                    # Make recovery_key accessible on global scope in order to reuse it for the next export:
+                                    global user_recovery_key
+                                    user_recovery_key = recovery_key
+                                print("\nYour texts have been successfully recovered.")
+                                break
+                            else:
+                                raise Exception
 
-                except Exception:
-                    print(colored("Invalid recovery key. Please try again with a valid key.", "red"))
+                    except Exception:
+                        print(colored("Invalid recovery key. Please try again with a valid key.", "red"))
             elif option.lower() == "no":
                 print("Ok! Continuing without import.")
                 break
