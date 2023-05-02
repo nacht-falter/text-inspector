@@ -463,10 +463,17 @@ def display_header():
 
 def select_text():
     """Create a new text or load an existing one"""
+    try:
+        selected_text = f"Selected text: {colored(current_text.title, 'yellow')}"
+    except NameError:
+        selected_text = "No text selected. Please create a new text or load a text from storage!"
+
     if storage:
-        select_text_menu = Menu("What would you like to do?", False, True, create_new_text, load_text)
+        select_text_menu = Menu(
+            f"{selected_text}\n\nWhat would you like to do?", False, True, create_new_text, load_text
+        )
     else:
-        select_text_menu = Menu("What would you like to do?", False, True, create_new_text)
+        select_text_menu = Menu(f"{selected_text}\n\nWhat would you like to do?", False, True, create_new_text)
 
     text = select_text_menu.display_menu()
 
@@ -648,7 +655,7 @@ def main():
         current_text = select_text()
 
         main_menu = Menu(
-            f"Selected text: {current_text.title}\n\nWhat would you like to do?",
+            f"Selected text: {colored(current_text.title, 'yellow')}\n\nWhat would you like to do?",
             True,
             False,
             current_text.spell_check,
