@@ -124,7 +124,7 @@ class Text:
                     f = open(f"{user_input}", "r")
                     lines = f.read()
                     f.close()
-                    print("\nSuccess! Here is the text from your file:\n")
+                    print(colored("\nSuccess! Here is the text from your file:\n", "green"))
                     print(lines)
                     input("Press Enter to continue.")
                     return lines
@@ -278,9 +278,9 @@ class Text:
         print(method)
         print(f"{SEPARATOR}\n")
         if method == "Spell check":
-            print("No spelling errors found")
+            print(colored("No spelling errors found", "green"))
         else:
-            print("No suggestions found.")
+            print(colored("No suggestions found.", "green"))
         input("\nPress Enter to return to menu.\n")
 
     def display_text(self):
@@ -298,8 +298,10 @@ class Text:
         total_words, unique_words, most_used_words = self.count_words()
         total_sentences, sentence_lengths = self.count_sentences()
 
-        print(f"Selected Text: {self.title}\n")
-        print("Text Metrics:\n")
+        print(SEPARATOR)
+        print("Text Metrics:")
+        print(SEPARATOR)
+        print(f"Selected Text: {colored(self.title, 'yellow')}\n")
         print(f"Words: {total_words}")
         print(f"Unique words: {len(unique_words)}")
         print(f"Sentences: {total_sentences}")
@@ -443,7 +445,7 @@ def display_header():
     """Clear terminal and display a header"""
     os.system("clear")  # https://www.pythonpip.com/python-tutorials/how-to-clear-console-in-python/
     print(SEPARATOR)
-    print("Welcome to " + "Text Inspector!".upper())
+    print("Welcome to " + colored("Text Inspector!".upper(), "cyan"))
     print(f"{SEPARATOR}\n")
 
 
@@ -536,7 +538,7 @@ def import_texts():
                                     # Make recovery_key accessible on global scope in order to reuse it for the next export:
                                     global user_recovery_key
                                     user_recovery_key = recovery_key
-                                print("\nYour texts have been successfully recovered.")
+                                print(colored("\nYour texts have been successfully recovered.", "green"))
                                 break
                             else:
                                 raise Exception
@@ -569,7 +571,7 @@ def exit_program():
                     export_texts()
                     break
                 elif option.lower() == "no":
-                    print("Ok! Your texts have been deleted.")
+                    print(colored("Ok! Your texts have been deleted.", "green"))
                     break
                 else:
                     raise ValueError
@@ -577,7 +579,7 @@ def exit_program():
             except ValueError:
                 print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No'.", "red"))
 
-    print("\nExiting. Thank you for using Text Inspector!")
+    print("\nExiting. Thank you for using" + colored("Text Inspector!", "cyan"))
     exit()
 
 
@@ -602,12 +604,12 @@ def export_texts():
         row = [storage[title].title, storage[title].text]
         worksheet.append_row(row)
 
-    print("\nYour texts have been successfully stored in the database.")
+        print(colored("\nYour texts have been successfully stored in the database.", "green"))
 
     if user_recovery_key:
-        print(f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'green')}")
+        print(f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'yellow')}")
     else:
-        print(f"You can import them with the following recovery key: {colored(recovery_key, 'green')}")
+        print(f"You can import them with the following recovery key: {colored(recovery_key, 'yellow')}")
 
     print("Please copy the key and save it.")
     input("\nPress Enter to exit\n")
