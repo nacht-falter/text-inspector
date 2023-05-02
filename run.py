@@ -515,17 +515,21 @@ def load_text():
 
 def import_texts():
     """Import stored texts with recovery key"""
-    while True:
+    wait_for_input = True
+    while wait_for_input:
         print("Would you like to import texts from a previous session?")
         option = input("Please enter 'yes' or 'no'.\n")
         try:
             if option.lower() == "yes":
                 while True:
                     try:
-                        user_input = input("Please enter your recovery key or enter 'b' to go back:\n")
+                        print("Please enter your recovery key (enter 'examples' to import some example texts)")
+                        print("Enter 'b' to go back:\n")
+                        user_input = input("")
                         if user_input == "b":
                             break
                         else:
+                            recovery_key = user_input
                             worksheet = SHEET.worksheet(recovery_key)
                             if worksheet:
                                 print("\nImporting texts ...")
@@ -539,6 +543,8 @@ def import_texts():
                                     global user_recovery_key
                                     user_recovery_key = recovery_key
                                 print(colored("\nYour texts have been successfully recovered.", "green"))
+                                input("\nPress Enter to continue")
+                                wait_for_input = False
                                 break
                             else:
                                 raise Exception
@@ -546,7 +552,8 @@ def import_texts():
                     except Exception:
                         print(colored("Invalid recovery key. Please try again with a valid key.", "red"))
             elif option.lower() == "no":
-                print("Ok! Continuing without import.")
+                print("\nOk! Continuing without import.")
+                time.sleep(2)
                 break
             else:
                 raise ValueError
