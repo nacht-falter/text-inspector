@@ -591,18 +591,22 @@ def exit_program():
 
 
 def export_texts():
-    """Export texts to Google spreadsheet"""
+    """Export texts in storage to Google spreadsheet"""
     print(f"\nUpdating text storage ...")
-
-    if user_recovery_key:
+    # Check if variable is defined: https://stackoverflow.com/questions/1592565/determine-if-variable-is-defined-in-python
+    try:
         recovery_key = user_recovery_key
         # Delete the old worksheet: https://docs.gspread.org/en/latest/user-guide.html#deleting-a-worksheet
         worksheet = SHEET.worksheet(recovery_key)
         SHEET.del_worksheet(worksheet)
-    else:
+        display_key_message = (
+            f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'yellow')}"
+        )
+    except NameError:
         # Generate random string: https://stackoverflow.com/questions/2030053/how-to-generate-random-strings-in-python
         letters = string.ascii_letters
         recovery_key = "".join(random.choice(letters) for i in range(10))
+        display_key_message = f"You can import them with the following recovery key: {colored(recovery_key, 'yellow')}"
 
     # Create new worksheet in spreadsheet: https://docs.gspread.org/en/latest/user-guide.html#creating-a-worksheet
     worksheet = SHEET.add_worksheet(title=recovery_key, rows=len(storage), cols=2)
@@ -611,13 +615,8 @@ def export_texts():
         row = [storage[title].title, storage[title].text]
         worksheet.append_row(row)
 
-        print(colored("\nYour texts have been successfully stored in the database.", "green"))
-
-    if user_recovery_key:
-        print(f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'yellow')}")
-    else:
-        print(f"You can import them with the following recovery key: {colored(recovery_key, 'yellow')}")
-
+    print(colored("\nYour texts have been successfully stored in the database.", "green"))
+    print(display_key_message)
     print("Please copy the key and save it.")
     input("\nPress Enter to exit\n")
 
