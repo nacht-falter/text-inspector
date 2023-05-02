@@ -455,10 +455,21 @@ class Menu:
 
 def display_header():
     """Clear terminal and display a header"""
+    # Track how often a function is called: https://stackoverflow.com/questions/21716940/is-there-a-way-to-track-the-number-of-times-a-function-is-called
+    display_header.counter += 1
     os.system("clear")  # https://www.pythonpip.com/python-tutorials/how-to-clear-console-in-python/
     print(SEPARATOR)
     print("Welcome to " + colored("Text Inspector!".upper(), "cyan"))
     print(f"{SEPARATOR}\n")
+    if display_header.counter <= 2:
+        print(
+            "Text Inspector is a text analysis tool, which provides spell checking and synonym suggestions as well as text metrics.\n"
+        )
+        print("You can create a new text item by pasting or entering text or by reading it from a file.")
+        print(
+            "If you like you can also import texts from a previous session, if you have saved them in the database.\n"
+        )
+        print(f"{SEPARATOR}\n")
 
 
 def select_text():
@@ -648,6 +659,7 @@ def export_texts():
 
 def main():
     """Run the program"""
+    display_header.counter = 0
     display_header()
     import_texts()
 
