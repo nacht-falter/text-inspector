@@ -1,4 +1,9 @@
-import os, time, re, random, string, gspread
+import os
+import time
+import re
+import random
+import string
+import gspread
 from spellchecker import SpellChecker
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -23,8 +28,8 @@ storage = {}
 
 
 class Text:
-    """
-    Creates an instance of a text. Retrieves text input from file or user input.
+    """Creates an instance of a text.
+    Retrieves text input from file or user input
 
     Attributes:
     - title: Title of the text instance provided by user
@@ -40,8 +45,9 @@ class Text:
     - no_suggestions(): Display a message when there are no suggestions
     - display_text(): Prints the revised text to the console
     - display_metrics(): Display text metrics
-    - count_words(): Get total word count, unique word count, and word frequency
-    - count_sentences(): Get total sentence count, longest/shortest sentence and average words per sentence
+    - count_words(): Get total/unique word count and word frequency
+    - count_sentences(): Get total sentences, longest/shortest sentence and
+      average words per sentence
     - save_text(): Add the text item to storage
     """
 
@@ -57,14 +63,34 @@ class Text:
                 title = str(input("Please enter a title for your text:\n"))
 
                 if len(title) == 0:
-                    # Colorize terminal output: https://stackoverflow.com/questions/37340049/how-do-i-print-colored-output-to-the-terminal-in-python
-                    raise ValueError(colored("The title can't be empty. Please provide a valid title", "red"))
-                elif not re.match(
-                    "^[a-zA-Z0-9 _-]*$", title
-                ):  # https://stackoverflow.com/questions/19970532/how-to-check-a-string-for-a-special-character
-                    raise ValueError(colored("The title cannot contain any special characters or numbers", "red"))
+                    # Colorize terminal output: https://stackoverflow.com/
+                    # questions/37340049/how-do-i-print-colored-output-to-the-
+                    # terminal-in-python
+                    raise ValueError(
+                        colored(
+                            "The title can't be empty. Please provide a valid"
+                            " title",
+                            "red",
+                        )
+                    )
+                elif not re.match("^[a-zA-Z0-9 _-]*$", title):
+                    # https://stackoverflow.com/questions/19970532/how-to-
+                    # check-a-string-for-a-special-character
+                    raise ValueError(
+                        colored(
+                            "The title cannot contain any special characters"
+                            " or numbers",
+                            "red",
+                        )
+                    )
                 elif title in storage:
-                    print(colored("A text with this title already exists. Please choose a different title.", "red"))
+                    print(
+                        colored(
+                            "A text with this title already exists. Please"
+                            " choose a different title.",
+                            "red",
+                        )
+                    )
                 else:
                     return title
 
@@ -75,7 +101,11 @@ class Text:
         """Create a new menu to determine input method"""
         while True:
             input_method_menu = Menu(
-                "Please choose an input method for your text.", False, False, self.user_input, self.file_input
+                "Please choose an input method for your text.",
+                False,
+                False,
+                self.user_input,
+                self.file_input,
             )
             text = input_method_menu.display_menu()
 
@@ -85,17 +115,21 @@ class Text:
     def user_input(self):
         """Read text from user input"""
         print("Please enter or paste your text.")
-        print("To save your input enter 'Done!' on a new line and press Enter.")
-        print("To select a different input method enter 'Go back!' on a new line and press Enter.\n")
+        print(
+            "To save your input enter 'Done!' on a new line and press Enter."
+        )
+        print(
+            "To select a different input method enter 'Go back!' on a new line"
+            " and press Enter.\n"
+        )
 
         lines = []
 
         while True:
             try:
-                """
-                Read multiline input:
-                https://stackoverflow.com/questions/30239092/how-to-get-multiline-input-from-the-user
-                """
+                # Read multiline input:
+                # https://stackoverflow.com/questions/30239092/how-to-get-
+                # multiline-input-from-the-user
                 while True:
                     try:
                         line = input()
@@ -119,36 +153,58 @@ class Text:
         """Read text from file"""
         while True:
             print("Please enter the name of your file.")
-            print("To select a different input method press 'b' and hit Enter.")
+            print(
+                "To select a different input method press 'b' and hit Enter."
+            )
             try:
-                user_input = input("Enter 'example1.txt' or 'example2.md' for examples).\n")
+                user_input = input(
+                    "Enter 'example1.txt' or 'example2.md' for examples).\n"
+                )
                 if user_input == "b":
                     return None
                 else:
                     f = open(f"{user_input}", "r")
                     lines = f.read()
                     f.close()
-                    print(colored("\nSuccess! Here is the text from your file:\n", "green"))
+                    print(
+                        colored(
+                            "\nSuccess! Here is the text from your file:\n",
+                            "green",
+                        )
+                    )
                     print(lines)
                     input("Press Enter to continue.")
                     return lines
 
             except FileNotFoundError:
-                print(colored("File not found. Please try again with a different file.\n", "red"))
+                print(
+                    colored(
+                        "File not found. Please try again with a different"
+                        " file.\n",
+                        "red",
+                    )
+                )
 
     def spell_check(self):
         """Check for spelling errors in the selected text"""
-        # pyspellchecker documentation: https://pyspellchecker.readthedocs.io/en/latest/
+        # pyspellchecker documentation: https://pyspellchecker.readthedocs.io
+        # /en/latest/
         spell = SpellChecker(language="en")
-        # Split text into list with words and punctuation: https://stackoverflow.com/questions/367155/splitting-a-string-into-words-and-punctuation
-        tokenized_text = re.findall(r"[a-zA-Z0-9ʼ'’_-]+|[^a-zA-Z0-9'ʼ’_-]", self.text)
+        # Split text into list with words and punctuation: https://
+        # stackoverflow.com/questions/367155/splitting-a-string-into-words-and-
+        # punctuation
+        tokenized_text = re.findall(
+            r"[a-zA-Z0-9ʼ'’_-]+|[^a-zA-Z0-9'ʼ’_-]", self.text
+        )
         all_words = re.findall(r"[a-zA-Z0-9ʼ'’_-]+", self.text)
         misspelled = [word for word in all_words if spell.unknown([word])]
 
         corrected_text = []
 
         def display_spelling_suggestions(word, suggestions, total, index):
-            """Display suggestions one by one and let user accept, edit or skip to next"""
+            """Display suggestions one by one and let user accept, edit or
+            skip to next
+            """
             display_header()
             print(SEPARATOR)
             print("Spell check")
@@ -182,7 +238,9 @@ class Text:
                         return list(suggestions)[int(option) - 1]
                     elif option == "e":
                         while True:
-                            replacement = input("Please enter your replacement:\n")
+                            replacement = input(
+                                "Please enter a replacement:\n"
+                            )
                             try:
                                 if len(replacement) == 0:
                                     raise ValueError
@@ -191,7 +249,9 @@ class Text:
                             except ValueError:
                                 print(
                                     colored(
-                                        "The replacement can't be an empty string. Please enter a replacement.", "red"
+                                        "The replacement can't be an empty"
+                                        " string. Please enter a replacement.",
+                                        "red",
                                     )
                                 )
                     elif option == "s":
@@ -202,7 +262,9 @@ class Text:
                 except ValueError:
                     print(
                         colored(
-                            f"Invalid choice. Possible values are numbers between 1 and {option_count - 1} and the letters e and s.",
+                            "Invalid choice. Possible values are numbers"
+                            f" between 1 and {option_count - 1} and the"
+                            " letters e and s.",
                             "red",
                         )
                     )
@@ -213,8 +275,13 @@ class Text:
             for word in tokenized_text:
                 if word in misspelled:
                     suggestions = spell.candidates(word)
-                    # Call display_suggestions method and pass it the current word and its suggestions
-                    corrected_text.append(display_spelling_suggestions(word, suggestions, len(misspelled), index))
+                    # Call display_suggestions method and pass it the
+                    # current word and its suggestions
+                    corrected_text.append(
+                        display_spelling_suggestions(
+                            word, suggestions, len(misspelled), index
+                        )
+                    )
                     index += 1
                 else:
                     corrected_text.append(word)
@@ -228,12 +295,19 @@ class Text:
 
     def suggest_synonyms(self):
         """Check for repeating words and suggest synonyms"""
-        tokenized_text = re.findall(r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text)
-        # Get most frequent words from count_words() and convert it to dictionary
+        tokenized_text = re.findall(
+            r"[\w'-]+|[ .,!?@#$%&*;:<>=()[\]{}\n]", self.text
+        )
+        # Get most frequent words from count_words() and convert it to
+        # dictionary
         most_used_words = dict(self.count_words()[2])
 
-        def display_synonym_suggestions(word, count, suggestions, total, index):
-            """Display suggestions one by one and let user accept, edit or skip to next"""
+        def display_synonym_suggestions(
+            word, count, suggestions, total, index
+        ):
+            """Display suggestions one by one and let user accept, edit or
+            skip to next
+            """
             display_header()
             print(SEPARATOR)
             print("Synonym Suggestions")
@@ -241,7 +315,9 @@ class Text:
             print(f"Current text: {colored(self.title, 'yellow')}\n")
             print(f"{total} frequently used words found.\n")
             print(
-                f"The word '{colored(word, 'red')}' occurs {count} times in the text. Here are a few synonyms, which you might consider using instead:"
+                f"The word '{colored(word, 'red')}' occurs {count} times in"
+                " the text. Here are a few synonyms, which you might consider"
+                " using instead:"
             )
             print(f"(Suggestion {index} of {total})\n")
 
@@ -257,12 +333,10 @@ class Text:
             input("\nPress Enter to go to next suggestion")
 
         def get_synonyms(word):
-            """
-            Get synonyms for a word from wordnet:
-            https://towardsdatascience.com/synonyms-and-antonyms-in-python-a865a5e14ce8
-            """
+            """Get synonyms for a word from wordnet"""
+            # https://towardsdatascience.com/synonyms-and-antonyms-in-python-
+            # a865a5e14ce8
             synonyms = set()
-            # Filter out common words by using stop words: https://pythonspot.com/nltk-stop-words/
             for synonym in wordnet.synsets(word):
                 for lemma in synonym.lemmas():
                     lemma_name = lemma.name()
@@ -270,7 +344,11 @@ class Text:
                         synonyms.add(lemma.name())
             return synonyms
 
-        repeating_words = set(word for word in tokenized_text if word in most_used_words and most_used_words[word] >= 4)
+        repeating_words = set(
+            word
+            for word in tokenized_text
+            if word in most_used_words and most_used_words[word] >= 4
+        )
         index = 1
         suggested_words = []
         if len(repeating_words) != 0:
@@ -278,8 +356,16 @@ class Text:
                 if word in repeating_words and word not in suggested_words:
                     synonyms = get_synonyms(word)
                     suggested_words.append(word)
-                    # Call display_suggestions method and pass it the current word, the word count and the synonyms as well as the sentence
-                    display_synonym_suggestions(word, most_used_words[word], synonyms, len(repeating_words), index)
+                    # Call display_suggestions method and pass it the
+                    # current word, the word count and the synonyms as well as
+                    # the sentence
+                    display_synonym_suggestions(
+                        word,
+                        most_used_words[word],
+                        synonyms,
+                        len(repeating_words),
+                        index,
+                    )
                     index += 1
 
             display_header()
@@ -323,9 +409,14 @@ class Text:
         print(f"Sentences: {total_sentences}")
         print(f"Longest sentence: {max(sentence_lengths)} words")
         print(f"Shortest sentence: {min(sentence_lengths)} words")
-        print(f"Average words per sentence: {round(total_words / total_sentences)}")
+        print(
+            "Average words per sentence:"
+            f" {round(total_words / total_sentences)}"
+        )
 
-        print(f"\nMost used words (lemmatized, not including very common words):")
+        print(
+            f"\nMost used words (lemmatized, not including very common words):"
+        )
 
         counter = 0
         for lemma, occurences in most_used_words:
@@ -339,8 +430,12 @@ class Text:
         """Get total word count, unique word count, and word frequency"""
         total_words = 0
 
-        # Tokenize text with nltk.tokenize. NLTK documentation: https://www.nltk.org/api/nltk.tokenize.html?highlight=tokenize#module-nltk.tokenize
+        # Tokenize text with nltk.tokenize. NLTK documentation: https://www.
+        # nltk.org/api/nltk.tokenize.html?highlight=tokenize#module-nltk.
+        # tokenize
         tokenized_text = word_tokenize(self.text)
+        # Filter out common words by using stop words: https://pythonspot.com
+        # /nltk-stop-words/
         stop_words = set(stopwords.words("english"))
         lemmas = {}
         unique_words = set()
@@ -349,7 +444,9 @@ class Text:
             if re.match(r"^[a-za-z]([\w-]*[a-za-z])?$", word):
                 total_words += 1
                 unique_words.add(word)
-                # Retrieve lemmas from WordNetLemmatizer: https://www.nltk.org/api/nltk.stem.wordnet.html?highlight=lemmatizer#nltk.stem.wordnet.WordNetLemmatizer
+                # Retrieve lemmas from WordNetLemmatizer: https://www.nltk.
+                # org/api/nltk.stem.wordnet.html?highlight=lemmatizer#nltk.stem.
+                # wordnet.WordNetLemmatizer
                 lemmatizer = WordNetLemmatizer()
                 lemma = lemmatizer.lemmatize(word)
 
@@ -358,15 +455,20 @@ class Text:
                         lemmas[lemma] += 1
                     else:
                         lemmas[lemma] = 1
-
-        # Sort the dictionary: https://realpython.com/sort-python-dictionary/#getting-keys-values-or-both-from-a-dictionary
-        most_used_words = sorted(lemmas.items(), key=lambda item: item[1], reverse=True)
+        # Sort the dictionary: https://realpython.com/sort-python-dictionary/#
+        # getting-keys-values-or-both-from-a-dictionary
+        most_used_words = sorted(
+            lemmas.items(), key=lambda item: item[1], reverse=True
+        )
 
         return total_words, unique_words, most_used_words
 
     def count_sentences(self):
-        """Get total sentence count, longest/shortest sentence and average words per sentence"""
-        # Total sentence count: https://stackoverflow.com/questions/15228054/how-to-count-the-amount-of-sentences-in-a-paragraph-in-python
+        """Get total sentence count, longest/shortest sentence and average
+        words per sentence
+        """
+        # Total sentence count: https://stackoverflow.com/questions/15228054/
+        # how-to-count-the-amount-of-sentences-in-a-paragraph-in-python
         all_sentences = re.split(r"[.!?]+", self.text)
         total_sentences = len(all_sentences)
 
@@ -387,8 +489,7 @@ class Text:
 
 
 class Menu:
-    """
-    Creates a menu which generates menu options from passed functions.
+    """Creates a menu which generates menu options from passed functions.
 
     Arguments:
     - Menu title (str)
@@ -417,16 +518,19 @@ class Menu:
             option_count = len(self.menu_items)
 
             for item in self.menu_items:
-                """
                 # Get function name and docstring:
-                # https://stackoverflow.com/questions/251464/how-to-get-a-function-name-as-a-string
-                # https://stackoverflow.com/questions/34277363/how-to-print-your-functions-documentation-python
-                """
-                menu_item = f'{item.__name__.capitalize().replace("_", " ")}: {item.__doc__}'
+                # https://stackoverflow.com/questions/251464/how-to-get-a-
+                # function-name-as-a-string
+                # https://stackoverflow.com/questions/34277363/how-to-print-
+                # your-functions-documentation-python
+                menu_item = (
+                    f'{item.__name__.capitalize().replace("_", " ")}:'
+                    f" {item.__doc__}"
+                )
                 print(f"{i}. {menu_item}")
                 i += 1
 
-            if self.exit_option == True:
+            if self.exit_option is True:
                 print(f"{i}. Exit program")
                 option_count += 1
 
@@ -436,22 +540,29 @@ class Menu:
                 option = int(option)
 
                 if option <= len(self.menu_items):
-                    # Call the function passed to the Menu class according to user selection:
+                    # Call the function passed to the Menu class according
+                    # to user selection:
                     self.return_value = self.menu_items[option - 1]()
 
                     if self.return_value == "break":
                         break
 
-                    if self.repeat == False:
+                    if self.repeat is False:
                         break
 
-                elif self.exit_option == True and option == option_count:
+                elif self.exit_option is True and option == option_count:
                     exit_program()
                 else:
                     raise ValueError
 
             except ValueError:
-                print(colored(f"Invalid choice. Please enter a number between 1 and {option_count}.\n", "red"))
+                print(
+                    colored(
+                        "Invalid choice. Please enter a number between 1 and"
+                        f" {option_count}.\n",
+                        "red",
+                    )
+                )
                 time.sleep(2)
 
         return self.return_value
@@ -459,19 +570,28 @@ class Menu:
 
 def display_header():
     """Clear terminal and display a header"""
-    # Track how often a function is called: https://stackoverflow.com/questions/21716940/is-there-a-way-to-track-the-number-of-times-a-function-is-called
+    # Track how often a function is called: https://stackoverflow.com/
+    # questions/21716940/is-there-a-way-to-track-the-number-of-times-a-function-
+    # is-called
     display_header.counter += 1
-    os.system("clear")  # https://www.pythonpip.com/python-tutorials/how-to-clear-console-in-python/
+    # https://www.pythonpip.com/python-tutorials/how-to-clear-console-in-
+    # python/
+    os.system("clear")
     print(SEPARATOR)
     print("Welcome to " + colored("Text Inspector!".upper(), "cyan"))
     print(f"{SEPARATOR}\n")
     if display_header.counter <= 2:
         print(
-            "Text Inspector is a text analysis tool, which provides spell checking and synonym suggestions as well as text metrics.\n"
+            "Text Inspector is a text analysis tool, which provides spell"
+            " checking and synonym suggestions as well as text metrics.\n"
         )
-        print("You can create a new text item by pasting or entering text or by reading it from a file.")
         print(
-            "If you like you can also import texts from a previous session, if you have saved them in the database.\n"
+            "You can create a new text item by pasting or entering text or by"
+            " reading it from a file."
+        )
+        print(
+            "If you like you can also import texts from a previous session, if"
+            " you have saved them in the database.\n"
         )
         print(f"{SEPARATOR}\n")
 
@@ -479,16 +599,30 @@ def display_header():
 def select_text():
     """Create a new text or load an existing one"""
     try:
-        selected_text = f"Selected text: {colored(current_text.title, 'yellow')}"
+        selected_text = (
+            f"Selected text: {colored(current_text.title, 'yellow')}"
+        )
     except NameError:
-        selected_text = "No text selected. Please create a new text or load a text from storage!"
+        selected_text = (
+            "No text selected. Please create a new text or load a text from"
+            " storage!"
+        )
 
     if storage:
         select_text_menu = Menu(
-            f"{selected_text}\n\nWhat would you like to do?", False, True, create_new_text, load_text
+            f"{selected_text}\n\nWhat would you like to do?",
+            False,
+            True,
+            create_new_text,
+            load_text,
         )
     else:
-        select_text_menu = Menu(f"{selected_text}\n\nWhat would you like to do?", False, True, create_new_text)
+        select_text_menu = Menu(
+            f"{selected_text}\n\nWhat would you like to do?",
+            False,
+            True,
+            create_new_text,
+        )
 
     text = select_text_menu.display_menu()
 
@@ -541,7 +675,9 @@ def load_text():
         except ValueError:
             print(
                 colored(
-                    f"Invalid choice. Please enter 'd' or 's' and then a number between 1 and {counter - 1}.\n", "red"
+                    "Invalid choice. Please enter 'd' or 's' and then a"
+                    f" number between 1 and {counter - 1}.\n",
+                    "red",
                 )
             )
             time.sleep(2)
@@ -557,7 +693,10 @@ def import_texts():
             if option.lower() == "yes":
                 while True:
                     try:
-                        print("Please enter your recovery key (enter 'examples' to import some example texts)")
+                        print(
+                            "Please enter your recovery key (enter 'examples'"
+                            " to import some example texts)"
+                        )
                         print("Enter 'b' to go back:\n")
                         user_input = input("")
                         if user_input == "b":
@@ -573,10 +712,18 @@ def import_texts():
                                     new_text.title = text[0]
                                     new_text.text = text[1]
                                     storage[new_text.title] = new_text
-                                    # Make recovery_key accessible on global scope in order to reuse it for the next export:
+                                    # Make recovery_key accessible on global
+                                    # scope in order to reuse it for the next
+                                    # export:
                                     global user_recovery_key
                                     user_recovery_key = recovery_key
-                                print(colored("\nYour texts have been successfully recovered.", "green"))
+                                print(
+                                    colored(
+                                        "\nYour texts have been successfully"
+                                        " imported.",
+                                        "green",
+                                    )
+                                )
                                 input("\nPress Enter to continue")
                                 wait_for_input = False
                                 break
@@ -584,7 +731,13 @@ def import_texts():
                                 raise Exception
 
                     except Exception:
-                        print(colored("Invalid recovery key. Please try again with a valid key.", "red"))
+                        print(
+                            colored(
+                                "Invalid recovery key. Please try again with a"
+                                " valid key.",
+                                "red",
+                            )
+                        )
             elif option.lower() == "no":
                 print("\nOk! Continuing without import.")
                 time.sleep(2)
@@ -593,7 +746,12 @@ def import_texts():
                 raise ValueError
 
         except ValueError:
-            print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No'.", "red"))
+            print(
+                colored(
+                    "Invalid option. Please answer 'yes|Yes' or 'no|No'.",
+                    "red",
+                )
+            )
 
 
 def exit_program():
@@ -603,17 +761,26 @@ def exit_program():
     if storage:
         print("Before you go ...")
         print("\nWould you like to save your texts to the database?")
-        print("If so, please make sure your texts don't contain any sensitive information.\n")
+        print(
+            "If so, please make sure your texts don't contain any sensitive"
+            " information.\n"
+        )
 
         while True:
-            option = input("Please enter 'yes' or 'no'.\nEnter 'b' to go back.\n")
+            option = input(
+                "Please enter 'yes' or 'no'.\nEnter 'b' to go back.\n"
+            )
 
             try:
                 if option.lower() == "yes":
                     export_texts()
                     break
                 elif option.lower() == "no":
-                    print(colored("OK, your changes have not been stored.", "green"))
+                    print(
+                        colored(
+                            "OK, your changes have not been stored.", "green"
+                        )
+                    )
                     break
                 elif option == "b":
                     exit_flag = False
@@ -622,39 +789,63 @@ def exit_program():
                     raise ValueError
 
             except ValueError:
-                print(colored("Invalid option. Please answer 'yes|Yes' or 'no|No' or enter 'b' to abort.", "red"))
+                print(
+                    colored(
+                        "Invalid option. Please answer 'yes|Yes' or 'no|No' or"
+                        " enter 'b' to abort.",
+                        "red",
+                    )
+                )
 
     if exit_flag:
-        print("\nExiting. Thank you for using " + colored("Text Inspector!", "cyan"))
+        print(
+            "\nExiting. Thank you for using "
+            + colored("Text Inspector!", "cyan")
+        )
         exit()
 
 
 def export_texts():
     """Export texts in storage to Google spreadsheet"""
     print(f"\nUpdating text storage ...")
-    # Check if variable is defined: https://stackoverflow.com/questions/1592565/determine-if-variable-is-defined-in-python
+    # Check if variable is defined: https://stackoverflow.com/questions/
+    # 1592565/determine-if-variable-is-defined-in-python
     try:
         recovery_key = user_recovery_key
-        # Delete the old worksheet: https://docs.gspread.org/en/latest/user-guide.html#deleting-a-worksheet
+        # Delete the old worksheet: https://docs.gspread.org/en/latest/user-
+        # guide.html#deleting-a-worksheet
         worksheet = SHEET.worksheet(recovery_key)
         SHEET.del_worksheet(worksheet)
         display_key_message = (
-            f"You can use the same recovery key as before to restore them: {colored(recovery_key, 'yellow')}"
+            "You can use the same recovery key as before to restore them:"
+            f" {colored(recovery_key, 'yellow')}"
         )
     except NameError:
-        # Generate random string: https://stackoverflow.com/questions/2030053/how-to-generate-random-strings-in-python
+        # Generate random string: https://stackoverflow.com/questions/2030053
+        # /how-to-generate-random-strings-in-python
         letters = string.ascii_letters
         recovery_key = "".join(random.choice(letters) for i in range(10))
-        display_key_message = f"You can import them with the following recovery key: {colored(recovery_key, 'yellow')}"
+        display_key_message = (
+            "You can import them with the following recovery key:"
+            f" {colored(recovery_key, 'yellow')}"
+        )
 
-    # Create new worksheet in spreadsheet: https://docs.gspread.org/en/latest/user-guide.html#creating-a-worksheet
-    worksheet = SHEET.add_worksheet(title=recovery_key, rows=len(storage), cols=2)
+    # Create new worksheet in spreadsheet: https://docs.gspread.org/en/latest
+    # /user-guide.html#creating-a-worksheet
+    worksheet = SHEET.add_worksheet(
+        title=recovery_key, rows=len(storage), cols=2
+    )
 
     for title in storage:
         row = [storage[title].title, storage[title].text]
         worksheet.append_row(row)
 
-    print(colored("\nYour texts have been successfully stored in the database.", "green"))
+    print(
+        colored(
+            "\nYour texts have been successfully stored in the database.",
+            "green",
+        )
+    )
     print(display_key_message)
     print("Please copy the key and save it.")
     input("\nPress Enter to exit\n")
@@ -670,7 +861,8 @@ def main():
         current_text = select_text()
 
         main_menu = Menu(
-            f"Selected text: {colored(current_text.title, 'yellow')}\n\nWhat would you like to do?",
+            f"Selected text: {colored(current_text.title, 'yellow')}\n\nWhat"
+            " would you like to do?",
             True,
             False,
             current_text.spell_check,
@@ -683,3 +875,4 @@ def main():
 
 
 main()
+
