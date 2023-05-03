@@ -58,6 +58,7 @@ class Text:
 
     def get_title(self):
         """Get instance title from user input"""
+        display_header()
         while True:
             try:
                 title = str(input("Please enter a title for your text:\n"))
@@ -84,7 +85,7 @@ class Text:
                         )
                     )
                 elif title in storage:
-                    print(
+                    raise ValueError(
                         colored(
                             "A text with this title already exists. Please"
                             " choose a different title.",
@@ -95,7 +96,7 @@ class Text:
                     return title
 
             except ValueError as e:
-                print(colored(f"Invalid data: {e}. Please try again.", "red"))
+                print(colored(f"Invalid data: {e}", "red"))
 
     def get_text(self):
         """Create a new menu to determine input method"""
@@ -580,7 +581,7 @@ def display_header():
     print(SEPARATOR)
     print("Welcome to " + colored("Text Inspector!".upper(), "cyan"))
     print(f"{SEPARATOR}\n")
-    if display_header.counter <= 2:
+    if display_header.counter <= 1:
         print(
             "Text Inspector is a text analysis tool, which provides spell"
             " checking and synonym suggestions as well as text metrics.\n"
@@ -698,7 +699,7 @@ def import_texts():
                             " to import some example texts)"
                         )
                         print("Enter 'b' to go back:\n")
-                        user_input = input("")
+                        user_input = input("Recovery key: ")
                         if user_input == "b":
                             break
                         else:
@@ -719,7 +720,7 @@ def import_texts():
                                     user_recovery_key = recovery_key
                                 print(
                                     colored(
-                                        "\nYour texts have been successfully"
+                                        "Your texts have been successfully"
                                         " imported.",
                                         "green",
                                     )
@@ -875,4 +876,3 @@ def main():
 
 
 main()
-
