@@ -639,6 +639,38 @@ def create_new_text():
 
 def load_text():
     """Load an existing text from storage"""
+
+    def delete_text(index):
+        text = list(storage.keys())[index - 1]
+        while True:
+            print(
+                f"Are you sure you want to delete {colored(text, 'yellow')}?"
+            )
+            confirm = input("Enter 'yes' or 'no': ")
+            try:
+                if confirm.lower() == "yes":
+                    storage.pop(text)
+                    print(
+                        "The following text has been deleted:"
+                        f" {colored(text, 'yellow')}."
+                    )
+                    time.sleep(2)
+                    break
+                elif confirm.lower() == "no":
+                    print("The text has not been deleted.")
+                    time.sleep(2)
+                    break
+                else:
+                    raise ValueError
+            except ValueError:
+                print(
+                    colored(
+                        "Invalid option. Please answer 'yes|Yes' or 'no|No'.",
+                        "red",
+                    )
+                )
+                time.sleep(2)
+
     while True:
         display_header()
         print("Available texts:\n")
@@ -648,8 +680,9 @@ def load_text():
         for title in storage:
             print(f"{counter}: {title}")
             counter += 1
-        print("\nPress 'd' to display a text.")
-        print("Press 's' to select a text.")
+        print("\nPress 'd' to display a text")
+        print("Press 's' to select a text")
+        print("Press 'x' to delete a text")
 
         option = input("\nPlease select an option:\n")
 
@@ -670,13 +703,19 @@ def load_text():
                     return list(storage.values())[index - 1]
                 else:
                     raise ValueError
+            elif option == "x":
+                index = int(input("Please choose a text:\n"))
+                if index < counter:
+                    delete_text(index)
+                else:
+                    raise ValueError
             else:
                 raise ValueError
 
         except ValueError:
             print(
                 colored(
-                    "Invalid choice. Please enter 'd' or 's' and then a"
+                    "Invalid choice. Please enter 'd', 's' or 'x' and then a"
                     f" number between 1 and {counter - 1}.\n",
                     "red",
                 )
