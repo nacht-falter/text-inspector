@@ -813,14 +813,17 @@ def export_texts():
     # 1592565/determine-if-variable-is-defined-in-python
     try:
         recovery_key = user_recovery_key
-        # Delete the old worksheet: https://docs.gspread.org/en/latest/user-
-        # guide.html#deleting-a-worksheet
-        worksheet = SHEET.worksheet(recovery_key)
-        SHEET.del_worksheet(worksheet)
-        display_key_message = (
-            "You can use the same recovery key as before to restore them:"
-            f" {colored(recovery_key, 'yellow')}"
-        )
+        if recovery_key == "examples":
+            raise NameError
+        else:
+            # Delete the old worksheet: https://docs.gspread.org/en/latest/user-
+            # guide.html#deleting-a-worksheet
+            worksheet = SHEET.worksheet(recovery_key)
+            SHEET.del_worksheet(worksheet)
+            display_key_message = (
+                "You can use the same recovery key as before to restore them:"
+                f" {colored(recovery_key, 'yellow')}"
+            )
     except NameError:
         # Generate random string: https://stackoverflow.com/questions/2030053
         # /how-to-generate-random-strings-in-python
