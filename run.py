@@ -174,7 +174,7 @@ class Text:
                         )
                     )
                     print(lines)
-                    input("Press Enter to continue.")
+                    input("\nPress Enter to continue.")
                     return lines
 
             except FileNotFoundError:
@@ -855,8 +855,8 @@ def export_texts():
         if recovery_key == "examples":
             raise NameError
         else:
-            # Delete the old worksheet: https://docs.gspread.org/en/latest/user-
-            # guide.html#deleting-a-worksheet
+            # Delete the old worksheet: https://docs.gspread.org/en/latest/user
+            # -guide.html#deleting-a-worksheet
             worksheet = SHEET.worksheet(recovery_key)
             SHEET.del_worksheet(worksheet)
             display_key_message = (
