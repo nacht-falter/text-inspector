@@ -18,20 +18,20 @@ It aims to provide a quick and lightweight command line alternative to more comp
 - On starting the application, you can decide if you want to import texts from the database. If you have previously used [Text Inspector](https://github.com/nacht-falter/text-inspector) and exported your texts, you can enter your recovery key to restore your texts. The texts will then be available from the text selection menu.
 - For demonstration purposes, you can enter `examples` in the recovery key input field, which will import some example texts from the database.
 
-![Importing texts](text-inspector-import-screenshot.png)
+![Importing texts](media/text-inspector-import-screenshot.png)
 
 #### Text selection
 - From the text selection menu, you can select a text, either by loading it from storage or by creating a new text. The option to load a text will only be available if you have already created a new text item or if you have imported texts from the database.
 - When you decide to load an existing text, you can preview the available texts before selecting one. You can also delete texts you don't need anymore from this menu.
 
-![Text selection](text-inspector-text-selection-screenshot.png)
+![Text selection](media/text-inspector-text-selection-screenshot.png)
 
 #### Text creation
 - When you create a new text item, you will be asked to provide a title for the text. Next, you can choose to enter the text from the command line or to provide a text file.
 - If you decide to enter text from the command line, you can paste the text or enter it manually. To save your input, enter `Done!` on a new line and press Enter. (Alternatively, you can try pressing `Ctrl-D` (or `Ctrl-Z` on Windows) on a new line.)
 - Providing a text file will only work, if you are running [Text Inspector](https://github.com/nacht-falter/text-inspector) locally on your machine. If you are using the [version deployed to Heroku](https://text-inspector.herokuapp.com/), you can read from example files uploaded to the server to test the feature.
 
-![User input](text-inspector-user-input-screenshot.png)
+![User input](media/text-inspector-user-input-screenshot.png)
 
 #### Text processing
 - Once you have created or selected a text, you can select one of four options:
@@ -45,14 +45,14 @@ It aims to provide a quick and lightweight command line alternative to more comp
 		- Average words per sentence
 		- Frequently used words (lemmatized and very common words not included)
 	- **Save text**: This will save changes made to the text and return to the text selection menu.
- ![Text processing](text-inspector-text-processing-menu.png)
+ ![Text processing](media/text-inspector-text-processing-menu.png)
 
 #### Exporting texts
 When you exit the application from the text selection menu, you can decide, if you want to store your text items in the database. If you choose to do that, you will be provided with a recovery key, which you can use to restore your saved texts on your next visit.
 
 The current version of [Text Inspector](https://github.com/nacht-falter/text-inspector) uses [Google Sheets](https://www.google.com/sheets/about/) to store the text items, and your texts will be stored in plain text. Please make sure your exported texts do not contain any sensitive information!
 
-![Exporting texts](text-inspector-export-screenshot.png)
+![Exporting texts](media/text-inspector-export-screenshot.png)
 
 ### Future features
 - Read input from URL: Let the user provide a URL to a text file as an alternative to command line input or reading a local file.
