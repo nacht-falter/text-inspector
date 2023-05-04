@@ -45,7 +45,8 @@ It aims to provide a quick and lightweight command line alternative to more comp
 		- Average words per sentence
 		- Frequently used words (lemmatized and very common words not included)
 	- **Save text**: This will save changes made to the text and return to the text selection menu.
- ![Text processing](media/text-inspector-text-processing-menu.png)
+
+![Text processing](media/text-inspector-text-processing-menu.png)
 
 #### Exporting texts
 When you exit the application from the text selection menu, you can decide, if you want to store your text items in the database. If you choose to do that, you will be provided with a recovery key, which you can use to restore your saved texts on your next visit.
