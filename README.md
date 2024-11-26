@@ -7,8 +7,6 @@ It aims to provide a quick and lightweight command line alternative to more comp
 
 [Text Inspector](https://github.com/nacht-falter/text-inspector) includes an import/export feature, which allows for storing and recovering texts from previous sessions.
 
-[Live version of the project on Heroku](https://text-inspector.herokuapp.com/)
-
 ![Text Inspector mockups](media/text-inspector-mockups.png)
 
 ## Features
@@ -29,7 +27,7 @@ It aims to provide a quick and lightweight command line alternative to more comp
 #### Text creation
 - When you create a new text item, you will be asked to provide a title for the text. Next, you can choose to enter the text from the command line or to provide a text file.
 - If you decide to enter text from the command line, you can paste the text or enter it manually. To save your input, enter `Done!` on a new line and press Enter. (Alternatively, you can try pressing `Ctrl-D` (or `Ctrl-Z` on Windows) on a new line.)
-- Providing a text file will only work, if you are running [Text Inspector](https://github.com/nacht-falter/text-inspector) locally on your machine. If you are using the [version deployed to Heroku](https://text-inspector.herokuapp.com/), you can read from example files uploaded to the server to test the feature.
+- Providing a text file will only work, if you are running [Text Inspector](https://github.com/nacht-falter/text-inspector) locally on your machine.
 
 ![User input](media/text-inspector-user-input-screenshot.png)
 
@@ -168,7 +166,7 @@ The code in `run.py` passes through the [Code Institute python linter](https://p
 
 ## Deployment
 
-- The project was deployed to [Heroku](https://heroku.com) using the [Code Institute mock terminal template](https://github.com/Code-Institute-Org/p3-template). The live version of the project can be found here: https://text-inspector.herokuapp.com
+- The project was initially deployed to [Heroku](https://heroku.com) using the [Code Institute mock terminal template](https://github.com/Code-Institute-Org/p3-template). This live demo is no longer available.
 - For the installation of NLTK in Heroku, a file named `nltk.txt` containing all NLTK modules to be installed [needs to be present in the root directory of the repository](https://devcenter.heroku.com/articles/python-nltk)
 - The necessary steps to deploy the project are:
 	- Clone or fork the repository.
